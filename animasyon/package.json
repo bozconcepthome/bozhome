@@ -15,7 +15,9 @@
     "ses:semmelweis": "ELEVENLABS_API_KEY=${ELEVENLABS_API_KEY:-proxy-injected} python3 ses_eleven.py public/semmelweis pqHfZKP75CvOlQylNhV4 eleven_v4 60 && python3 ses_tasarimi_semmelweis.py",
     "render:semmelweis": "remotion render src/semmelweis/index.ts Video cikti/semmelweis_60s.mp4 --concurrency=2 --crf=23 --browser-executable=/opt/pw-browsers/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell",
     "ses:evhavasi": "ELEVENLABS_API_KEY=${ELEVENLABS_API_KEY:-proxy-injected} python3 ses_eleven.py public/evhavasi pqHfZKP75CvOlQylNhV4 eleven_v4 35 && python3 ses_tasarimi_evhavasi.py",
-    "render:evhavasi": "remotion render src/evhavasi/index.ts Video cikti/evhavasi_35s.mp4 --concurrency=2 --crf=23 --browser-executable=/opt/pw-browsers/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell"
+    "render:evhavasi": "remotion render src/evhavasi/index.ts Video cikti/evhavasi_35s.mp4 --concurrency=2 --crf=23 --browser-executable=/opt/pw-browsers/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell",
+    "ses:sehpahikaye": "ELEVENLABS_API_KEY=${ELEVENLABS_API_KEY:-proxy-injected} python3 ses_eleven.py public/sehpahikaye pqHfZKP75CvOlQylNhV4 eleven_v4 58 && python3 ses_tasarimi_sehpahikaye.py",
+    "render:sehpahikaye": "remotion render src/sehpahikaye/index.ts Video cikti/sehpahikaye_58s.mp4 --concurrency=2 --crf=23 --browser-executable=/opt/pw-browsers/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell"
   },
   "dependencies": {
     "@fontsource/bebas-neue": "^5.3.0",
