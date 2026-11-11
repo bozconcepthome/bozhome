@@ -5,9 +5,12 @@
   "description": "Remotion ile kodla çizilen dikey animasyon videoları (React + SVG, ses: edge-tts)",
   "scripts": {
     "ses": "python3 ses.py public/sandalye",
-    "render": "remotion render src/sandalye/index.ts Video cikti/sandalye_30s.mp4 --concurrency=2 --crf=23 --browser-executable=/opt/pw-browsers/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell"
+    "render": "remotion render src/sandalye/index.ts Video cikti/sandalye_30s.mp4 --concurrency=2 --crf=23 --browser-executable=/opt/pw-browsers/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell",
+    "ses:fetih": "python3 ses.py public/fetih tr-TR-AhmetNeural 15",
+    "render:fetih": "remotion render src/fetih/index.ts Video cikti/fetih_15s.mp4 --concurrency=2 --crf=23 --browser-executable=/opt/pw-browsers/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell"
   },
   "dependencies": {
+    "@fontsource/bebas-neue": "^5.3.0",
     "@fontsource/patrick-hand": "^5.3.0",
     "@remotion/cli": "^4.0.542",
     "@types/react": "^19.3.0",
