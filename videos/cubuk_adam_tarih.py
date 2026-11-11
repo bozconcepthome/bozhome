@@ -3,7 +3,8 @@
 Konu: "15 Saniyede Evin Tarihi"
 Kullanım:  python3 videos/cubuk_adam_tarih.py
 Çıktı:     videos/cubuk_adam_tarih_15s.mp4  (1080x1920, 30 fps, sesli)
-Gereksinim: Pillow, numpy, ffmpeg, espeak-ng (Türkçe ses: `apt-get install espeak-ng`)
+Gereksinim: Pillow, numpy, ffmpeg, edge-tts (`pip install edge-tts`, Microsoft nöral Türkçe ses)
+            İnternet yoksa yedek olarak espeak-ng kullanılır (kalitesi düşüktür).
 """
 import math
 import os
@@ -19,7 +20,8 @@ W, H, FPS, DUR = 1080, 1920, 30, 15.0
 N = int(FPS * DUR)
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HERE, "cubuk_adam_tarih_15s.mp4")
-VOICE, SPEED, PITCH = "tr+m3", 180, 50
+NEURAL_VOICE, NEURAL_RATE = "tr-TR-AhmetNeural", "+8%"   # kadın sesi için: tr-TR-EmelNeural
+VOICE, SPEED, PITCH = "tr+m3", 180, 50                    # yedek: espeak-ng
 SR = 22050
 
 LINES = [
@@ -51,9 +53,22 @@ WOOD = (150, 100, 60)
 SOFA = (120, 150, 140)
 
 # ---------------------------------------------------------------- ses
+def tts_neural(text, path):
+    mp3 = path + ".mp3"
+    cmd = ["edge-tts", "-v", NEURAL_VOICE, f"--rate={NEURAL_RATE}", "-t", text, "--write-media", mp3]
+    proxy = os.environ.get("HTTPS_PROXY") or os.environ.get("https_proxy")
+    if proxy:
+        cmd += ["--proxy", proxy]
+    subprocess.run(cmd, check=True, capture_output=True)
+    subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", mp3, "-ac", "1", "-ar", str(SR), path], check=True)
+
 def tts(text, path):
-    subprocess.run(["espeak-ng", "-v", VOICE, "-s", str(SPEED), "-p", str(PITCH),
-                    "-w", path, text], check=True)
+    try:
+        tts_neural(text, path)
+    except (subprocess.CalledProcessError, FileNotFoundError) as e:
+        print("Nöral ses alınamadı, espeak-ng kullanılıyor:", e)
+        subprocess.run(["espeak-ng", "-v", VOICE, "-s", str(SPEED), "-p", str(PITCH),
+                        "-w", path, text], check=True)
     with wave.open(path) as w:
         sr = w.getframerate()
         data = np.frombuffer(w.readframes(w.getnframes()), dtype=np.int16).astype(np.float32) / 32768
@@ -78,6 +93,7 @@ def build_audio(tmp):
                             "-i", a, "-filter:a", f"atempo={tempo:.4f}", "-f", "f32le", b], check=True)
             sped.append(np.fromfile(b, dtype=np.float32))
         clips = sped
+    print("Seslendirme süreleri:", [round(len(c) / SR, 2) for c in clips], "tempo:", round(tempo, 3))
     voice = np.zeros(int(DUR * SR), dtype=np.float32)
     env = np.zeros(N)  # kare başına konuşma şiddeti (ağız animasyonu)
     starts, t = [], lead
