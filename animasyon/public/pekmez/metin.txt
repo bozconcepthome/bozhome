@@ -1,0 +1,7 @@
+[rate=+2%,pitch=-2Hz] Bir şehrin sokaklarını... pekmez bastı.
+[rate=+6%] 1919.|Bin_dokuz_yüz_on_dokuz. Boston'daki bir tankta 8,7|sekiz_virgül_yedi milyon litre pekmez.
+[rate=+4%] Öğlen, perçinler makineli tüfek gibi patlıyor... ve tank yarılıyor.
+[rate=+10%,pitch=+2Hz] Sekiz metrelik bir dalga, saatte 56|elli_altı kilometreyle sokakları yutuyor.
+[rate=-2%,pitch=-4Hz] 21|Yirmi_bir kişi ölüyor, yaklaşık 150|yüz_elli kişi yaralanıyor.
+[rate=+4%] Soğukta koyulaşan pekmez, insanları içine hapsediyor.
+[rate=+4%] Felaketten sonra, yapı planlarına mühendis imzası zorunlu oldu.
