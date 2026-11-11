@@ -1,0 +1,10 @@
+{
+  "_aciklama": "Fotogerçekçi bir video aracıyla ürettiğiniz klibi public/pompeii/klipler/ klasörüne koyun ve ilgili sahneye dosya adını yazın (ör. \"s3.mp4\"). null kalan sahne, kodla çizilen temsilî animasyonla gösterilir.",
+  "s0_ucus": null,
+  "s1_sokak": null,
+  "s2_vezuv": null,
+  "s3_patlama": null,
+  "s4_kul_yagmuru": null,
+  "s5_akinti": null,
+  "s6_kalintilar": null
+}
