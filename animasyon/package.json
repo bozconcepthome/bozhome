@@ -9,12 +9,15 @@
     "ses:fetih": "python3 ses.py public/fetih tr-TR-AhmetNeural 15",
     "render:fetih": "remotion render src/fetih/index.ts Video cikti/fetih_15s.mp4 --concurrency=2 --crf=23 --browser-executable=/opt/pw-browsers/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell",
     "ses:pekmez": "python3 ses.py public/pekmez tr-TR-AhmetNeural 30 && python3 ses_tasarimi_pekmez.py",
-    "render:pekmez": "remotion render src/pekmez/index.ts Video cikti/pekmez_30s.mp4 --concurrency=2 --crf=23 --browser-executable=/opt/pw-browsers/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell"
+    "render:pekmez": "remotion render src/pekmez/index.ts Video cikti/pekmez_30s.mp4 --concurrency=2 --crf=23 --browser-executable=/opt/pw-browsers/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell",
+    "ses:sehpa": "python3 ses.py public/sehpa tr-TR-EmelNeural 10 && python3 ses_tasarimi_sehpa.py",
+    "render:sehpa": "remotion render src/sehpa/index.ts Video cikti/sehpa_10s.mp4 --concurrency=2 --crf=23 --browser-executable=/opt/pw-browsers/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell"
   },
   "dependencies": {
     "@fontsource/bebas-neue": "^5.3.0",
     "@fontsource/inter": "^5.3.0",
     "@fontsource/patrick-hand": "^5.3.0",
+    "@fontsource/playfair-display": "^5.3.0",
     "@remotion/cli": "^4.0.542",
     "@types/react": "^19.3.0",
     "react": "^19.3.1",

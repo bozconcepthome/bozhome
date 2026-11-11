@@ -16,7 +16,7 @@ import edge_tts
 klasor = sys.argv[1]
 SES = sys.argv[2] if len(sys.argv) > 2 else "tr-TR-AhmetNeural"
 HEDEF = float(sys.argv[3]) if len(sys.argv) > 3 else 30.0
-BAS, SON, EN_AZ_ARA, EN_COK_ARA = 0.3, 1.1, 0.3, 0.9
+BAS, SON, EN_AZ_ARA, EN_COK_ARA = 0.2, 0.55, 0.1, 0.6
 PROXY = os.environ.get("HTTPS_PROXY") or os.environ.get("https_proxy")
 
 async def uret(metin, yol, rate="+0%", pitch="+0Hz"):
@@ -85,7 +85,7 @@ async def main():
                 j += n
                 kel.append({"w": gor, "s": grup[0]["s"], "e": grup[-1]["e"]})
             # baştaki/sondaki sessizliği kelime zamanlarına göre kırp
-            bas, bit = max(0, kel[0]["s"] - 0.15), kel[-1]["e"] + 0.15
+            bas, bit = max(0, kel[0]["s"] - 0.28), kel[-1]["e"] + 0.15
             wav = f"{tmp}/{i}.wav"
             subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", yol, "-ss", f"{bas}", "-to", f"{bit}",
                             "-ar", "44100", "-ac", "1", wav], check=True)

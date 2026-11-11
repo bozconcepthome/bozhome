@@ -1,0 +1,4 @@
+[rate=+8%,pitch=+8Hz] Hem sehpa, hem dergilik!
+[rate=+8%,pitch=+6Hz] Şık, parlak telleriyle evinize modern bir dokunuş.
+[rate=+10%,pitch=+6Hz] Kahveniz üstte, dergileriniz yanında.
+[rate=+6%,pitch=+8Hz] Boz|Boz Concept|Konsept Home'da|Hom'da sizi bekliyor!
