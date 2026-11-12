@@ -5,7 +5,7 @@ Bulut ortamında anahtar ağ vekili tarafından eklenir; o durumda ELEVENLABS_AP
 Girdi metin.txt: her satır bir sahne. [yönlendirme] okunmaz (eleven_v4 ton etiketi),
 gösterim|okunuş: ekranda ilki, seste ikincisi ("1847|bin_sekiz_yüz_kırk_yedi").
 Uzun metin ~700 karakterlik parçalara bölünür; parçalar previous_text/next_text ile birbirine bağlanır."""
-import base64, json, os, re, ssl, subprocess, sys, tempfile, urllib.request
+import base64, hashlib, json, os, re, ssl, subprocess, sys, tempfile, time, urllib.error, urllib.request
 
 klasor, ses = sys.argv[1], sys.argv[2]
 model = sys.argv[3] if len(sys.argv) > 3 else "eleven_v4"
@@ -52,11 +52,29 @@ with tempfile.TemporaryDirectory() as tmp:
             govde["previous_text"] = re.sub(r"\|\S+", "", okunus(parcalar[pi - 1]))[-400:]
         if pi < len(parcalar) - 1:
             govde["next_text"] = re.sub(r"\|\S+", "", okunus(parcalar[pi + 1]))[:400]
-        istek = urllib.request.Request(
-            f"https://api.elevenlabs.io/v1/text-to-speech/{ses}/with-timestamps?output_format=mp3_44100_128",
-            data=json.dumps(govde).encode(), headers={"xi-api-key": anahtar, "Content-Type": "application/json"})
-        with urllib.request.urlopen(istek, timeout=300, context=baglam) as y:
-            sonuc = json.load(y)
+        govde_b = json.dumps(govde, sort_keys=True).encode()
+        anahtar_h = hashlib.sha256(govde_b + ses.encode()).hexdigest()[:20]
+        onbellek = os.path.join(klasor, ".onbellek", f"{anahtar_h}.json")
+        if os.path.exists(onbellek):
+            sonuc = json.load(open(onbellek))
+        else:
+            for deneme in range(5):
+                try:
+                    istek = urllib.request.Request(
+                        f"https://api.elevenlabs.io/v1/text-to-speech/{ses}/with-timestamps?output_format=mp3_44100_128",
+                        data=govde_b, headers={"xi-api-key": anahtar, "Content-Type": "application/json"})
+                    with urllib.request.urlopen(istek, timeout=300, context=baglam) as y:
+                        sonuc = json.load(y)
+                    break
+                except urllib.error.HTTPError as h:
+                    print(f"  HTTP {h.code}: {h.read()[:200]!r} — yeniden deneniyor")
+                except Exception as h:
+                    print(f"  hata: {h} — yeniden deneniyor")
+                time.sleep(2 ** deneme * 3)
+            else:
+                raise SystemExit("ElevenLabs isteği başarısız")
+            os.makedirs(os.path.dirname(onbellek), exist_ok=True)
+            json.dump(sonuc, open(onbellek, "w"))
         yol = f"{tmp}/p{pi}.mp3"
         open(yol, "wb").write(base64.b64decode(sonuc["audio_base64"]))
         h = sonuc["alignment"]

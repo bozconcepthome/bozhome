@@ -16,7 +16,7 @@ import edge_tts
 klasor = sys.argv[1]
 SES = sys.argv[2] if len(sys.argv) > 2 else "tr-TR-AhmetNeural"
 HEDEF = float(sys.argv[3]) if len(sys.argv) > 3 else 30.0
-BAS, SON, EN_AZ_ARA, EN_COK_ARA = 0.2, 0.55, 0.1, 0.6
+BAS, SON, EN_AZ_ARA, EN_COK_ARA = 0.2, 0.55, 0.1, float(os.environ.get("ARA_MAX", "0.6"))
 PROXY = os.environ.get("HTTPS_PROXY") or os.environ.get("https_proxy")
 
 async def uret(metin, yol, rate="+0%", pitch="+0Hz"):
@@ -40,6 +40,8 @@ def coz(satir):
     m = re.match(r"\s*\[([^\]]*)\]\s*", satir)
     if m:
         for kv in m.group(1).split(","):
+            if "=" not in kv:
+                continue  # ElevenLabs ton etiketi; edge-tts için yok sayılır
             k, v = kv.split("=")
             ayar[k.strip()] = v.strip()
         satir = satir[m.end():]
