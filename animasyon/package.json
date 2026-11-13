@@ -23,7 +23,9 @@
     "ses:koylu": "ELEVENLABS_API_KEY=${ELEVENLABS_API_KEY:-proxy-injected} python3 ses_eleven.py public/koylu pqHfZKP75CvOlQylNhV4 eleven_v4 300 && python3 ses_tasarimi_koylu.py",
     "ses:koylu:edge": "ARA_MAX=1.2 python3 ses.py public/koylu tr-TR-AhmetNeural 300 && python3 ses_tasarimi_koylu.py",
     "render:koylu": "remotion render src/koylu/index.ts Video cikti/koylu_5dk.mp4 --concurrency=4 --crf=23 --browser-executable=/opt/pw-browsers/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell",
-    "kapak:koylu": "remotion still src/koylu/index.ts Kapak cikti/koylu_kapak.png --browser-executable=/opt/pw-browsers/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell"
+    "kapak:koylu": "remotion still src/koylu/index.ts Kapak cikti/koylu_kapak.png --browser-executable=/opt/pw-browsers/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell",
+    "ses:suicmek": "python3 ses.py public/suicmek tr-TR-EmelNeural 55 && python3 ses_tasarimi_suicmek.py",
+    "render:suicmek": "remotion render src/suicmek/index.ts Video cikti/suicmek_55s.mp4 --concurrency=4 --crf=23 --browser-executable=/opt/pw-browsers/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell"
   },
   "dependencies": {
     "@fontsource/bebas-neue": "^5.3.0",
