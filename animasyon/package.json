@@ -25,7 +25,9 @@
     "render:koylu": "remotion render src/koylu/index.ts Video cikti/koylu_5dk.mp4 --concurrency=4 --crf=23 --browser-executable=/opt/pw-browsers/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell",
     "kapak:koylu": "remotion still src/koylu/index.ts Kapak cikti/koylu_kapak.png --browser-executable=/opt/pw-browsers/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell",
     "ses:suicmek": "python3 ses.py public/suicmek tr-TR-EmelNeural 55 && python3 ses_tasarimi_suicmek.py",
-    "render:suicmek": "remotion render src/suicmek/index.ts Video cikti/suicmek_55s.mp4 --concurrency=4 --crf=23 --browser-executable=/opt/pw-browsers/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell"
+    "render:suicmek": "remotion render src/suicmek/index.ts Video cikti/suicmek_55s.mp4 --concurrency=4 --crf=23 --browser-executable=/opt/pw-browsers/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell",
+    "ses:duzen": "python3 ses.py public/duzen tr-TR-EmelNeural 42 && python3 ses_tasarimi_duzen.py",
+    "render:duzen": "remotion render src/duzen/index.ts Video cikti/duzen_40s.mp4 --concurrency=4 --crf=23 --browser-executable=/opt/pw-browsers/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell"
   },
   "dependencies": {
     "@fontsource/bebas-neue": "^5.3.0",
