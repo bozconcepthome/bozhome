@@ -1,0 +1,292 @@
+:root {
+  --bg: #0b0f1e;
+  --panel: rgba(18, 24, 48, .72);
+  --panel-solid: #131a35;
+  --line: rgba(140, 160, 255, .16);
+  --text: #e8ecff;
+  --muted: #8f9ac4;
+  --accent: #6ee7ff;
+  --accent2: #a78bfa;
+  --accent3: #f472b6;
+  --ok: #4ade80;
+  --bad: #fb7185;
+  --body-hi: #c9f2ff;
+  --body: #7aa8ff;
+  --body-lo: #4b5bd6;
+  --eye: #6ee7ff;
+  font-family: "Segoe UI Variable", "Segoe UI", system-ui, sans-serif;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; overflow: hidden; background: var(--bg); color: var(--text); }
+button { font: inherit; color: inherit; cursor: pointer; border: 0; background: none; }
+.hidden { display: none !important; }
+
+#bg { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; }
+#flash { position: fixed; inset: 0; background: #fff; opacity: 0; pointer-events: none; z-index: 50; }
+#flash.on { animation: flash .45s ease-out; }
+@keyframes flash { 0% { opacity: .55 } 100% { opacity: 0 } }
+
+#app { position: relative; z-index: 1; height: 100%; display: flex; flex-direction: column; }
+
+/* ---------- başlık ---------- */
+header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 8px 6px 14px; cursor: move; user-select: none;
+}
+.brand { display: flex; align-items: center; gap: 6px; font-size: 15px; letter-spacing: .3px; }
+.brand .sub { color: var(--muted); font-weight: 400; }
+.brand .dot {
+  width: 9px; height: 9px; border-radius: 50%; background: var(--ok);
+  box-shadow: 0 0 10px var(--ok); animation: pulse 2s infinite;
+}
+.badge {
+  margin-left: 6px; font-size: 10.5px; padding: 2px 8px; border-radius: 99px;
+  background: rgba(74, 222, 128, .15); color: var(--ok); border: 1px solid rgba(74, 222, 128, .35);
+}
+.badge.free { background: rgba(251, 113, 133, .15); color: var(--bad); border-color: rgba(251, 113, 133, .4); }
+.win-btns { display: flex; gap: 2px; }
+.win-btns button {
+  width: 28px; height: 26px; border-radius: 8px; color: var(--muted); font-size: 13px;
+  transition: background .2s, color .2s, transform .15s;
+}
+.win-btns button:hover { background: rgba(255, 255, 255, .08); color: var(--text); transform: translateY(-1px); }
+.win-btns button.danger:hover { background: var(--bad); color: #fff; }
+@keyframes pulse { 0%, 100% { transform: scale(1); opacity: 1 } 50% { transform: scale(1.35); opacity: .6 } }
+
+/* ---------- sahne & karakter ---------- */
+#stage { position: relative; height: 210px; display: grid; place-items: center; flex: none; }
+#boz { position: relative; width: 168px; height: 168px; transition: transform .4s cubic-bezier(.34, 1.56, .64, 1); }
+#boz svg { width: 100%; height: 100%; overflow: visible; }
+#boz:hover { transform: scale(1.05); }
+
+#float { animation: float 3.2s ease-in-out infinite; transform-origin: 100px 100px; }
+#shadow { animation: shadow 3.2s ease-in-out infinite; transform-origin: 100px 194px; }
+@keyframes float { 0%, 100% { transform: translateY(0) rotate(0) } 50% { transform: translateY(-9px) rotate(1.5deg) } }
+@keyframes shadow { 0%, 100% { transform: scaleX(1); opacity: .35 } 50% { transform: scaleX(.8); opacity: .2 } }
+
+#eyes { transition: transform .15s ease-out; }
+.eye { transform-box: fill-box; transform-origin: center; transition: height .2s, y .2s, rx .2s; }
+#eyes.blink .eye { animation: blink .18s ease-in-out; }
+@keyframes blink { 50% { transform: scaleY(.08) } }
+
+#mouth { transition: d .3s; }
+#bulb { animation: bulb 2.4s ease-in-out infinite; }
+@keyframes bulb { 0%, 100% { opacity: 1 } 50% { opacity: .45 } }
+#antenna { transform-origin: 100px 44px; animation: wiggle 4s ease-in-out infinite; }
+@keyframes wiggle { 0%, 100% { transform: rotate(0) } 25% { transform: rotate(-6deg) } 75% { transform: rotate(6deg) } }
+.hand { transform-box: fill-box; transform-origin: center; }
+#hands .l { animation: handL 3.2s ease-in-out infinite; }
+#hands .r { animation: handR 3.2s ease-in-out infinite; }
+@keyframes handL { 50% { transform: translate(-3px, -6px) } }
+@keyframes handR { 50% { transform: translate(3px, -6px) } }
+
+/* yörünge (düşünürken) */
+#orbit { position: absolute; width: 230px; height: 230px; opacity: 0; transition: opacity .4s; pointer-events: none; }
+#orbit i {
+  position: absolute; left: 50%; top: 50%; width: 9px; height: 9px; margin: -4.5px;
+  border-radius: 50%; background: var(--accent); box-shadow: 0 0 12px var(--accent);
+  animation: orbit 2.2s linear infinite;
+}
+#orbit i:nth-child(2) { animation-delay: -.44s; background: var(--accent2); box-shadow: 0 0 12px var(--accent2); }
+#orbit i:nth-child(3) { animation-delay: -.88s; background: var(--accent3); box-shadow: 0 0 12px var(--accent3); }
+#orbit i:nth-child(4) { animation-delay: -1.32s; }
+#orbit i:nth-child(5) { animation-delay: -1.76s; background: var(--accent2); box-shadow: 0 0 12px var(--accent2); }
+@keyframes orbit {
+  from { transform: rotate(0) translateX(108px) rotate(0) scale(1) }
+  50% { transform: rotate(180deg) translateX(96px) rotate(-180deg) scale(.6) }
+  to { transform: rotate(360deg) translateX(108px) rotate(-360deg) scale(1) }
+}
+
+/* efektler */
+#zzz { position: absolute; right: 0; top: 4px; font-weight: 700; color: var(--accent2); opacity: 0; }
+#zzz span { display: inline-block; animation: zzz 2.4s ease-in-out infinite; }
+#zzz span:nth-child(2) { animation-delay: .4s; font-size: 1.2em }
+#zzz span:nth-child(3) { animation-delay: .8s; font-size: 1.5em }
+@keyframes zzz { 0% { transform: translate(0, 10px); opacity: 0 } 50% { opacity: 1 } 100% { transform: translate(14px, -18px); opacity: 0 } }
+
+#fxCursor, #fxKeys { position: absolute; font-size: 26px; opacity: 0; pointer-events: none; }
+#fxCursor { right: -14px; bottom: 26px; }
+#fxKeys { left: -16px; bottom: 18px; }
+#ripple {
+  position: absolute; right: -6px; bottom: 18px; width: 40px; height: 40px; border-radius: 50%;
+  border: 3px solid var(--accent); opacity: 0; pointer-events: none;
+}
+#boz.click #fxCursor { animation: cursorTap .7s ease-out; }
+#boz.click #ripple { animation: ripple .7s ease-out .15s; }
+@keyframes cursorTap { 0% { opacity: 0; transform: translate(20px, 20px) } 40% { opacity: 1; transform: translate(0, 0) } 55% { transform: scale(.82) } 100% { opacity: 0; transform: scale(1) } }
+@keyframes ripple { 0% { opacity: 1; transform: scale(.2) } 100% { opacity: 0; transform: scale(1.8) } }
+#boz.typing #fxKeys { opacity: 1; animation: keys .25s ease-in-out infinite alternate; }
+@keyframes keys { to { transform: translateY(-5px) rotate(-6deg) } }
+
+/* ---- durumlar ---- */
+#boz.thinking ~ #orbit, #stage:has(#boz.thinking) #orbit { opacity: 1; }
+#boz.thinking #eyes { transform: translate(6px, -6px); }
+#boz.thinking .eye { height: 12px; y: 92px; }
+#boz.thinking #mouth { d: path("M92 122 Q100 122 108 122"); }
+#boz.thinking #bulb { animation: bulbFast .5s ease-in-out infinite; }
+@keyframes bulbFast { 50% { opacity: .2; transform: scale(.7) } }
+
+#boz.looking #scan { animation: scan 1s ease-in-out infinite; }
+@keyframes scan { 0% { y: 66px; opacity: .0 } 20% { opacity: .55 } 80% { opacity: .55 } 100% { y: 132px; opacity: 0 } }
+#boz.looking .eye { height: 26px; y: 84px; }
+#boz.looking #mouth { d: path("M94 122 Q100 128 106 122"); }
+
+#boz.acting #float { animation: hop .5s ease-in-out infinite; }
+@keyframes hop { 50% { transform: translateY(-14px) } }
+#boz.acting #hands .r { animation: point .5s ease-in-out infinite; }
+@keyframes point { 50% { transform: translate(10px, -22px) } }
+#boz.acting #mouth { d: path("M88 120 Q100 130 112 120"); }
+
+#boz.typing #hands .l, #boz.typing #hands .r { animation: tap .18s ease-in-out infinite alternate; }
+#boz.typing #hands .r { animation-delay: .09s; }
+@keyframes tap { to { transform: translateY(-7px) } }
+#boz.typing #eyes { transform: translateY(5px); }
+
+#boz.talking #mouth { animation: talk .22s ease-in-out infinite alternate; }
+@keyframes talk { from { d: path("M88 120 Q100 124 112 120") } to { d: path("M90 118 Q100 136 110 118") } }
+
+#boz.happy #float { animation: jump .55s cubic-bezier(.3, 1.6, .5, 1) 2; }
+@keyframes jump { 40% { transform: translateY(-26px) rotate(-6deg) } 70% { transform: translateY(0) scale(1.06, .94) } }
+#boz.happy .eye { height: 10px; y: 92px; rx: 5px; }
+#boz.happy #mouth { d: path("M84 116 Q100 138 116 116"); }
+#boz.happy #cheeks { animation: blush 1s ease-in-out; }
+@keyframes blush { 50% { opacity: 1.6 } }
+
+#boz.error { --eye: var(--bad); --accent: var(--bad); }
+#boz.error #float { animation: shake .45s ease-in-out 2; }
+@keyframes shake { 20%, 60% { transform: translateX(-8px) rotate(-3deg) } 40%, 80% { transform: translateX(8px) rotate(3deg) } }
+#boz.error #mouth { d: path("M88 126 Q100 116 112 126"); }
+
+#boz.sleeping #float { animation: float 6s ease-in-out infinite; }
+#boz.sleeping .eye { height: 3px; y: 98px; }
+#boz.sleeping #mouth { d: path("M94 122 Q100 124 106 122"); }
+#boz.sleeping #zzz { opacity: 1; }
+#boz.sleeping #bulb { animation: none; opacity: .25; }
+
+#boz.listening .eye { height: 25px; y: 84px; }
+#boz.listening .ear { animation: earWiggle .6s ease-in-out infinite alternate; transform-box: fill-box; transform-origin: center; }
+@keyframes earWiggle { to { transform: scaleY(1.18) } }
+
+/* durum hapı */
+#statusPill {
+  position: absolute; bottom: 4px; display: flex; align-items: center; gap: 8px;
+  max-width: 88%; padding: 5px 14px; border-radius: 99px; font-size: 12.5px;
+  background: var(--panel); border: 1px solid var(--line); backdrop-filter: blur(10px);
+  transition: all .3s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+#statusText { overflow: hidden; text-overflow: ellipsis; }
+.spinner { width: 12px; height: 12px; flex: none; border-radius: 50%; border: 2px solid var(--line); border-top-color: var(--accent); display: none; }
+body.busy .spinner { display: block; animation: spin .8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg) } }
+
+/* ---------- sohbet ---------- */
+#chat { flex: 1; min-height: 0; display: flex; flex-direction: column; padding: 0 12px 12px; gap: 8px; }
+#messages {
+  flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;
+  padding: 6px 2px; scroll-behavior: smooth;
+  mask-image: linear-gradient(to bottom, transparent 0, #000 14px);
+}
+#messages::-webkit-scrollbar { width: 6px; }
+#messages::-webkit-scrollbar-thumb { background: var(--line); border-radius: 9px; }
+
+.welcome { text-align: center; padding: 4px 6px; animation: rise .6s ease-out; }
+.welcome h2 { margin: 2px 0 4px; font-size: 18px; }
+.welcome p { margin: 0 0 12px; color: var(--muted); font-size: 13px; }
+.grad { background: linear-gradient(90deg, var(--accent), var(--accent2), var(--accent3)); -webkit-background-clip: text; background-clip: text; color: transparent; background-size: 200%; animation: shine 3s linear infinite; }
+@keyframes shine { to { background-position: 200% 0 } }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
+.chip {
+  font-size: 12px; padding: 6px 11px; border-radius: 99px; background: var(--panel);
+  border: 1px solid var(--line); transition: transform .2s, border-color .2s, background .2s;
+  animation: rise .5s ease-out backwards;
+}
+.chip:nth-child(2) { animation-delay: .08s } .chip:nth-child(3) { animation-delay: .16s } .chip:nth-child(4) { animation-delay: .24s }
+.chip:hover { transform: translateY(-2px); border-color: var(--accent); background: rgba(110, 231, 255, .1); }
+
+.msg {
+  max-width: 88%; padding: 9px 12px; border-radius: 16px; font-size: 13.5px; line-height: 1.45;
+  white-space: pre-wrap; word-wrap: break-word; animation: pop .35s cubic-bezier(.34, 1.56, .64, 1);
+}
+.msg.user { align-self: flex-end; background: linear-gradient(135deg, #4f46e5, #7c3aed); border-bottom-right-radius: 5px; }
+.msg.bot { align-self: flex-start; background: var(--panel); border: 1px solid var(--line); border-bottom-left-radius: 5px; backdrop-filter: blur(8px); }
+.msg.err { align-self: stretch; max-width: 100%; background: rgba(251, 113, 133, .12); border: 1px solid rgba(251, 113, 133, .4); color: #ffd1d9; }
+.msg .caret { display: inline-block; width: 7px; height: 14px; background: var(--accent); vertical-align: -2px; margin-left: 2px; animation: caret .8s steps(1) infinite; }
+@keyframes caret { 50% { opacity: 0 } }
+@keyframes pop { from { opacity: 0; transform: translateY(10px) scale(.92) } to { opacity: 1; transform: none } }
+@keyframes rise { from { opacity: 0; transform: translateY(12px) } to { opacity: 1; transform: none } }
+
+.step {
+  align-self: flex-start; display: flex; align-items: center; gap: 7px; max-width: 94%;
+  font-size: 11.5px; color: var(--muted); padding: 4px 10px; border-radius: 10px;
+  background: rgba(255, 255, 255, .035); border: 1px dashed var(--line);
+  animation: slideIn .35s ease-out;
+}
+.step .ico { font-size: 13px; }
+.step .txt { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.step.run .ico { animation: spin 1.2s linear infinite; display: inline-block; }
+.step.ok { border-style: solid; }
+.step.ok::after { content: "✓"; color: var(--ok); margin-left: 2px; }
+.step.fail::after { content: "✕"; color: var(--bad); margin-left: 2px; }
+@keyframes slideIn { from { opacity: 0; transform: translateX(-14px) } to { opacity: 1; transform: none } }
+
+.card {
+  padding: 12px; border-radius: 14px; font-size: 12.5px; line-height: 1.5;
+  background: rgba(167, 139, 250, .12); border: 1px solid rgba(167, 139, 250, .4); animation: rise .4s;
+}
+.card b { color: #fff; }
+.card code { background: rgba(0, 0, 0, .35); padding: 1px 6px; border-radius: 5px; }
+.card button { margin-top: 8px; margin-right: 6px; padding: 6px 12px; border-radius: 9px; background: var(--accent2); color: #120b2e; font-weight: 600; }
+
+#composer {
+  display: flex; gap: 6px; align-items: flex-end; padding: 6px; border-radius: 16px;
+  background: var(--panel); border: 1px solid var(--line); backdrop-filter: blur(12px);
+  transition: border-color .25s, box-shadow .25s;
+}
+#composer:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(110, 231, 255, .14), 0 0 24px rgba(110, 231, 255, .15); }
+#input {
+  flex: 1; resize: none; border: 0; outline: 0; background: transparent; color: var(--text);
+  font: inherit; font-size: 13.5px; padding: 7px 6px; max-height: 96px;
+}
+#input::placeholder { color: var(--muted); }
+#btnSend, #btnStop {
+  width: 36px; height: 36px; flex: none; border-radius: 12px; font-size: 15px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #0b0f1e;
+  transition: transform .2s, filter .2s;
+}
+#btnSend:hover { transform: scale(1.08) rotate(-8deg); filter: brightness(1.15); }
+#btnStop { background: var(--bad); color: #fff; animation: pulse 1.4s infinite; }
+
+/* ---------- ayarlar ---------- */
+#settings {
+  position: fixed; inset: 0 0 0 auto; width: 100%; z-index: 20; padding: 18px 18px;
+  background: rgba(11, 15, 30, .94); backdrop-filter: blur(16px);
+  transform: translateX(105%); transition: transform .45s cubic-bezier(.22, 1, .36, 1);
+  display: flex; flex-direction: column; gap: 12px; overflow-y: auto;
+}
+#settings.open { transform: none; }
+#settings h3 { margin: 4px 0 6px; font-size: 18px; }
+#settings .row, #settings .col {
+  display: flex; gap: 10px; padding: 12px; border-radius: 14px; background: var(--panel); border: 1px solid var(--line);
+}
+#settings .row { align-items: center; justify-content: space-between; }
+#settings .col { flex-direction: column; }
+#settings small { display: block; color: var(--muted); font-size: 11.5px; margin-top: 2px; }
+#settings input[type=text] { background: rgba(0, 0, 0, .3); border: 1px solid var(--line); color: var(--text); border-radius: 9px; padding: 7px 9px; font: inherit; outline: 0; }
+.toggle { appearance: none; width: 42px; height: 24px; flex: none; border-radius: 99px; background: #2a3158; position: relative; cursor: pointer; transition: background .25s; }
+.toggle::after { content: ""; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: #fff; transition: transform .3s cubic-bezier(.34, 1.56, .64, 1); }
+.toggle:checked { background: var(--ok); }
+.toggle:checked::after { transform: translateX(18px); }
+.wide { padding: 10px; border-radius: 12px; background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #0b0f1e; font-weight: 600; transition: transform .2s; }
+.wide:hover { transform: translateY(-2px); }
+.wide.ghost { background: var(--panel); color: var(--text); border: 1px solid var(--line); }
+.hint { font-size: 12px; color: var(--muted); margin: 0; }
+
+/* ---------- mini mod ---------- */
+body.mini header .brand, body.mini #chat, body.mini #btnSettings, body.mini #btnMin { display: none; }
+body.mini header { position: absolute; right: 0; top: 0; z-index: 5; padding: 4px; }
+body.mini #stage { height: 100%; cursor: pointer; }
+body.mini #boz { width: 130px; height: 130px; }
+body.mini #orbit { width: 170px; height: 170px; }
+body.mini #orbit i { animation-name: orbitMini; }
+@keyframes orbitMini { from { transform: rotate(0) translateX(78px) } to { transform: rotate(360deg) translateX(78px) } }
+body.mini #statusPill { font-size: 10.5px; padding: 3px 9px; max-width: 94%; }

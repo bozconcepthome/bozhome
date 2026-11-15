@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Boz Agent</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<canvas id="bg"></canvas>
+<div id="flash"></div>
+
+<div id="app">
+  <!-- Başlık (sürükleme alanı) -->
+  <header class="pywebview-drag-region">
+    <div class="brand pywebview-drag-region">
+      <span class="dot"></span>
+      <b>Boz</b><span class="sub">Agent</span>
+      <span id="modeBadge" class="badge">Onaylı</span>
+    </div>
+    <div class="win-btns">
+      <button id="btnMini" title="Mini mod">◱</button>
+      <button id="btnSettings" title="Ayarlar">⚙</button>
+      <button id="btnMin" title="Küçült">—</button>
+      <button id="btnClose" title="Kapat" class="danger">✕</button>
+    </div>
+  </header>
+
+  <!-- Karakter -->
+  <section id="stage">
+    <div id="orbit"><i></i><i></i><i></i><i></i><i></i></div>
+    <div id="boz" class="idle">
+      <svg viewBox="0 0 200 200" aria-label="Boz karakteri">
+        <defs>
+          <radialGradient id="gBody" cx="38%" cy="30%" r="75%">
+            <stop offset="0%" stop-color="var(--body-hi)"/>
+            <stop offset="55%" stop-color="var(--body)"/>
+            <stop offset="100%" stop-color="var(--body-lo)"/>
+          </radialGradient>
+          <radialGradient id="gFace" cx="50%" cy="40%" r="70%">
+            <stop offset="0%" stop-color="#111834"/>
+            <stop offset="100%" stop-color="#05081a"/>
+          </radialGradient>
+          <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="3" result="b"/>
+            <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>
+        <g id="float">
+          <!-- anten -->
+          <g id="antenna">
+            <line x1="100" y1="44" x2="100" y2="22" stroke="var(--body-lo)" stroke-width="4" stroke-linecap="round"/>
+            <circle id="bulb" cx="100" cy="18" r="7" fill="var(--accent)" filter="url(#glow)"/>
+          </g>
+          <!-- kulaklar -->
+          <rect class="ear l" x="22" y="88" width="16" height="34" rx="8" fill="var(--body-lo)"/>
+          <rect class="ear r" x="162" y="88" width="16" height="34" rx="8" fill="var(--body-lo)"/>
+          <!-- kafa -->
+          <rect x="34" y="42" width="132" height="118" rx="54" fill="url(#gBody)"/>
+          <ellipse cx="74" cy="62" rx="22" ry="9" fill="#fff" opacity=".35" transform="rotate(-18 74 62)"/>
+          <!-- yüz ekranı -->
+          <rect id="face" x="50" y="66" width="100" height="72" rx="34" fill="url(#gFace)"/>
+          <g id="eyes" filter="url(#glow)">
+            <rect class="eye l" x="70" y="86" width="16" height="22" rx="8" fill="var(--eye)"/>
+            <rect class="eye r" x="114" y="86" width="16" height="22" rx="8" fill="var(--eye)"/>
+          </g>
+          <g id="cheeks">
+            <ellipse cx="66" cy="118" rx="7" ry="4" fill="#ff6fa8" opacity=".55"/>
+            <ellipse cx="134" cy="118" rx="7" ry="4" fill="#ff6fa8" opacity=".55"/>
+          </g>
+          <path id="mouth" d="M88 120 Q100 128 112 120" stroke="var(--eye)" stroke-width="4"
+                fill="none" stroke-linecap="round" filter="url(#glow)"/>
+          <rect id="scan" x="50" y="66" width="100" height="6" fill="var(--eye)" opacity="0"/>
+          <!-- eller -->
+          <g id="hands">
+            <circle class="hand l" cx="40" cy="168" r="11" fill="url(#gBody)"/>
+            <circle class="hand r" cx="160" cy="168" r="11" fill="url(#gBody)"/>
+          </g>
+        </g>
+        <ellipse id="shadow" cx="100" cy="194" rx="46" ry="6" fill="#000" opacity=".35"/>
+      </svg>
+      <div id="zzz"><span>z</span><span>z</span><span>Z</span></div>
+      <div id="fxCursor">🖱️</div>
+      <div id="fxKeys"><span>⌨</span></div>
+      <div id="ripple"></div>
+    </div>
+    <div id="statusPill"><span class="spinner"></span><span id="statusText">Hazırım</span></div>
+  </section>
+
+  <!-- Sohbet -->
+  <section id="chat">
+    <div id="messages">
+      <div class="welcome">
+        <h2>Merhaba! Ben <span class="grad">Boz</span> 👋</h2>
+        <p>Bilgisayarını senin yerine kullanabilirim. Ne yapmamı istersin?</p>
+        <div class="chips">
+          <button class="chip">Not Defteri'ni aç ve kısa bir şiir yaz</button>
+          <button class="chip">Masaüstümde hangi dosyalar var?</button>
+          <button class="chip">YouTube'da lo-fi müzik aç</button>
+          <button class="chip">İndirilenler klasörünü türlerine göre düzenle</button>
+        </div>
+      </div>
+    </div>
+    <div id="setupCard" class="card hidden"></div>
+    <form id="composer" autocomplete="off">
+      <textarea id="input" rows="1" placeholder="Boz'a bir görev ver..."></textarea>
+      <button id="btnSend" type="submit" title="Gönder">➤</button>
+      <button id="btnStop" type="button" title="Durdur" class="hidden">■</button>
+    </form>
+  </section>
+</div>
+
+<!-- Ayarlar -->
+<aside id="settings">
+  <h3>Ayarlar</h3>
+  <label class="row">
+    <div><b>Onaylı mod</b><small>Her tıklama ve yazmadan önce izin ister (önerilir)</small></div>
+    <input type="checkbox" id="setSafe" class="toggle">
+  </label>
+  <label class="row">
+    <div><b>Sesli konuşma</b><small>Boz cevaplarını sesli okur</small></div>
+    <input type="checkbox" id="setVoice" class="toggle">
+  </label>
+  <label class="col">
+    <b>Model (boş = varsayılan)</b>
+    <input type="text" id="setModel" placeholder="Boş bırakabilirsin">
+  </label>
+  <button id="btnLogin" class="wide">🔑 ChatGPT ile giriş yap</button>
+  <button id="btnNew" class="wide ghost">🧹 Yeni sohbet</button>
+  <p class="hint">Acil durdurma: fareyi hızla ekranın <b>sol üst köşesine</b> götür
+    veya ■ düğmesine bas.</p>
+  <button id="btnCloseSettings" class="wide ghost">Kapat</button>
+</aside>
+
+<script src="app.js"></script>
+</body>
+</html>
