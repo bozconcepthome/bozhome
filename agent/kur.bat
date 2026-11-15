@@ -55,12 +55,17 @@ powershell -NoProfile -ExecutionPolicy Bypass -Command ^
   "$s.Save()"
 
 echo.
-echo  ----------------------------------------------
-echo   ChatGPT hesabinla giris yapiliyor...
-echo   Tarayicida acilan sayfada "Sign in with ChatGPT" sec.
-echo  ----------------------------------------------
 call codex login status >nul 2>&1
-if errorlevel 1 ( call codex login )
+if errorlevel 1 (
+  echo  ----------------------------------------------
+  echo   ChatGPT hesabinla giris yapiliyor...
+  echo   Tarayicida acilan sayfada "Sign in with ChatGPT" sec.
+  echo  ----------------------------------------------
+  call codex login
+) else (
+  echo  [OK] ChatGPT hesabina zaten giris yapilmis.
+  echo       Baska bir hesapla girmek icin: codex logout  sonra  codex login
+)
 
 echo.
 echo  ==============================================
