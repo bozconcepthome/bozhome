@@ -47,68 +47,73 @@ class Api:
     """JavaScript tarafından çağrılan fonksiyonlar (window.pywebview.api.*)."""
 
     def __init__(self) -> None:
-        self.window: webview.Window | None = None
-        self.settings = load_settings()
-        self.bridge = CodexBridge(self._emit, WORKDIR)
+        self._window: webview.Window | None = None
+        self._settings = load_settings()
+        self._bridge = CodexBridge(self._emit, WORKDIR)
 
     # Python -> JS
     def _emit(self, ev: dict) -> None:
-        if self.window:
+        if self._window:
             try:
-                self.window.evaluate_js(f"window.onAgentEvent({json.dumps(ev, ensure_ascii=False)})")
+                self._window.evaluate_js(f"window.onAgentEvent({json.dumps(ev, ensure_ascii=False)})")
             except Exception:
                 pass
 
     # JS -> Python
     def init(self) -> dict:
-        threading.Thread(target=lambda: self._emit({"type": "status", **self.bridge.check()}),
+        threading.Thread(target=lambda: self._emit({"type": "status", **self._bridge.check()}),
                          daemon=True).start()
-        return self.settings
+        return self._settings
 
     def send(self, text: str) -> None:
         text = (text or "").strip()
         if text:
-            self.bridge.send(text, self.settings)
+            self._bridge.send(text, self._settings)
 
     def stop(self) -> None:
-        self.bridge.stop()
+        self._bridge.stop()
 
     def new_chat(self) -> None:
-        self.bridge.new_chat()
+        self._bridge.new_chat()
 
     def login(self) -> None:
-        self.bridge.login()
+        self._bridge.login()
 
     def recheck(self) -> None:
-        self._emit({"type": "status", **self.bridge.check()})
+        self._emit({"type": "status", **self._bridge.check()})
 
     def set_setting(self, key: str, value) -> dict:
         if key in DEFAULT_SETTINGS:
-            self.settings[key] = value
-            save_settings(self.settings)
-        return self.settings
+            self._settings[key] = value
+            save_settings(self._settings)
+        return self._settings
 
     def set_mini(self, mini: bool) -> None:
-        if not self.window:
+        if not self._window:
             return
-        self.settings["mini"] = bool(mini)
-        save_settings(self.settings)
+        self._settings["mini"] = bool(mini)
+        save_settings(self._settings)
         if mini:
-            self.window.resize(MINI_W, MINI_H)
+            self._window.resize(MINI_W, MINI_H)
         else:
-            self.window.resize(W, H)
+            self._window.resize(W, H)
 
     def minimize(self) -> None:
-        if self.window:
-            self.window.minimize()
+        if self._window:
+            self._window.minimize()
 
     def quit(self) -> None:
-        self.bridge.stop()
-        if self.window:
-            self.window.destroy()
+        self._bridge.stop()
+        if self._window:
+            self._window.destroy()
 
 
 def main() -> None:
+    HOME.mkdir(parents=True, exist_ok=True)
+    if sys.stderr is None or "pythonw" in sys.executable.lower():
+        # pythonw konsol açmaz; hataları dosyaya yaz ki sorun olursa görülebilsin
+        log = open(HOME / "hata.log", "w", encoding="utf-8", buffering=1)
+        sys.stdout = sys.stderr = log
     prepare_workdir()
     api = Api()
     x = y = None
@@ -117,7 +122,7 @@ def main() -> None:
         x, y = scr.width - W - 24, scr.height - H - 64
     except Exception:
         pass
-    mini = api.settings.get("mini")
+    mini = api._settings.get("mini")
     win = webview.create_window(
         "Boz Agent",
         url=str(HERE / "ui" / "index.html"),
@@ -131,7 +136,7 @@ def main() -> None:
         resizable=False,
         background_color="#0b0f1e",
     )
-    api.window = win
+    api._window = win
     webview.start(debug="--debug" in sys.argv)
 
 

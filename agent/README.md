@@ -72,7 +72,7 @@ Arka plandaki parçacıklar da Boz'un ruh haline göre renk ve hız değiştirir
 | "Kullanım limitine ulaşıldı" | ChatGPT planının Codex limiti doldu; biraz bekle. |
 | Yanlış yere tıklıyor | Windows ekran ölçeği %100/125/150 desteklenir. Birden fazla monitörde Boz sadece **ana ekranı** kullanır. |
 | Pencere açılmıyor | [WebView2 Runtime](https://developer.microsoft.com/microsoft-edge/webview2/)'ı kur. |
-| Hata ayrıntısı görmek | Komut isteminde: `.venv\Scripts\python.exe app.py --debug` |
+| Hata ayrıntısı görmek | `C:\Users\<adın>\BozAgent\hata.log` dosyasına bak veya komut isteminde: `.venv\Scripts\python.exe app.py --debug` |
 
 ## Güvenlik notları
 
