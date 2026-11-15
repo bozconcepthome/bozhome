@@ -118,6 +118,8 @@ class CodexBridge:
             "mcp_servers.pc.args=[" + ",".join(_toml_str(a) for a in server_args) + "]",
             "mcp_servers.pc.startup_timeout_sec=40",
             "mcp_servers.pc.tool_timeout_sec=600",
+            # Codex'in kendi MCP onayı arka planda verilemez; onayı pc_tools_server (--confirm) sorar
+            'mcp_servers.pc.default_tools_approval_mode="approve"',
             'approval_policy="never"',
             'sandbox_mode="workspace-write"' if safe else 'sandbox_mode="danger-full-access"',
             "sandbox_workspace_write.network_access=true",
