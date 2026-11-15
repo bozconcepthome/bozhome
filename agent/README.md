@@ -35,12 +35,29 @@ kullanım ChatGPT planının Codex limitinden düşer.
 - Boz çalışırken her adımı (📸 ekrana bakma, 🖱️ tıklama, ⌨️ yazma, 💻 komut)
   sohbette canlı olarak görürsün. Robot da yaptığı işe göre animasyon oynatır.
 - **◱** düğmesi Boz'u **mini moda** alır (sadece robot kalır). Robota tıklayınca geri açılır.
-- **⚙ Ayarlar**:
-  - **Onaylı mod** (varsayılan, önerilir): her tıklama, yazma ve program açmadan
-    önce "İzin veriyor musun?" diye sorar.
-  - **Serbest mod**: sormadan çalışır. Sadece güvendiğin işlerde kullan.
-  - **Sesli konuşma**: Boz cevaplarını Türkçe sesli okur.
-  - **Yeni sohbet**: önceki konuşmayı unutup baştan başlar.
+- Mesaj kutusunun üstünde iki küçük çip var:
+  - **✦ Model çipi**: kullanılan model ve düşünme seviyesi (ör. *GPT-6.1-Sol · Orta ⚡*).
+  - **Kullanım çipi**: ChatGPT kullanım hakkından ne kadar kaldığı (ör. *%72 kaldı · hafta %59*).
+  İkisine de tıklayınca Ayarlar açılır.
+
+### ⚙ Ayarlar
+- **📊 Kullanım hakkın**: ChatGPT planın (Plus/Pro), **5 saatlik** ve **haftalık**
+  limitlerinden ne kadar kaldığı, ne zaman yenileneceği. Bilgi doğrudan OpenAI'den gelir;
+  her görevden sonra ve 2 dakikada bir kendiliğinden yenilenir.
+- **🧠 Model**: hesabında açık olan tüm modeller listelenir.
+  - **Düşünme seviyesi**: Düşük → Ultra. Yüksek seviyeler daha dikkatli ama daha yavaştır
+    ve kullanım hakkını daha hızlı bitirir. Bilgisayar kontrolü için *Düşük* veya *Orta* yeterlidir.
+  - **⚡ Hızlı mod**: 2 kat hızlı, ama kullanım hakkını daha çabuk tüketir.
+- **🛡️ İzinler**:
+  | Mod | Ne zaman sorar |
+  |---|---|
+  | 🧠 **Akıllı** (varsayılan) | Sadece riskli işlemlerde: Alt+F4, Shift+Delete, Ctrl+Alt+Delete, `.exe/.bat/.ps1` gibi program dosyası çalıştırma. Dosya silme, satın alma, mesaj gönderme gibi işleri Boz yapmadan önce **sohbette** sorar. |
+  | ✋ **Her şeyi sor** | Her tıklama, yazma ve tuşta. **"Bu görevde hep izin ver"** düğmesiyle o görev bitene kadar bir daha sormaz. Komutlar sadece çalışma klasörüne yazabilir. |
+  | 🚀 **Serbest** | Hiç sormaz. |
+
+  İzin soruları artık ayrı bir Windows penceresinde değil, **Boz'un içinde** animasyonlu
+  bir kart olarak çıkar (kısa bir "ding" sesiyle). 5 dakika cevap verilmezse reddedilir.
+- **🔊 Sesli konuşma**: Boz cevaplarını Türkçe sesli okur.
 
 ### 🛑 Acil durdurma
 - Kırmızı **■** düğmesine bas, **veya**
@@ -69,14 +86,16 @@ Arka plandaki parçacıklar da Boz'un ruh haline göre renk ve hız değiştirir
 |---|---|
 | "Codex CLI bulunamadı" | `kur.bat`'ı tekrar çalıştır. |
 | "ChatGPT hesabına giriş yapılmamış" | Ayarlar → **ChatGPT ile giriş yap**. |
-| "Kullanım limitine ulaşıldı" | ChatGPT planının Codex limiti doldu; biraz bekle. |
+| "Kullanım limitine ulaşıldı" | Ayarlar → Kullanım hakkın bölümü ne zaman yenileneceğini gösterir. Daha düşük düşünme seviyesi veya daha hafif bir model daha az harcar. |
+| Kullanım bilgisi görünmüyor | Ayarlar → Kullanım hakkın → **↻ Yenile**. Olmazsa Codex'i güncelle: `npm install -g @openai/codex` |
 | Yanlış yere tıklıyor | Windows ekran ölçeği %100/125/150 desteklenir. Birden fazla monitörde Boz sadece **ana ekranı** kullanır. |
 | Pencere açılmıyor | [WebView2 Runtime](https://developer.microsoft.com/microsoft-edge/webview2/)'ı kur. |
 | Hata ayrıntısı görmek | `C:\Users\<adın>\BozAgent\hata.log` dosyasına bak veya komut isteminde: `.venv\Scripts\python.exe app.py --debug` |
 
 ## Güvenlik notları
 
-- Boz bilgisayarında gerçekten tıklar ve yazar. İlk zamanlarda **Onaylı mod**da kullan.
+- Boz bilgisayarında gerçekten tıklar ve yazar. Akıllı ve Serbest modda PowerShell
+  komutlarını da kısıtlamasız çalıştırabilir; bu yüzden önemli işlerde **Her şeyi sor** modunu kullan.
 - Şifre, kart bilgisi veya para gönderme gibi işleri ona yaptırma.
 - Ekran görüntüleri yalnızca görevi yapmak için ChatGPT'ye (OpenAI) gönderilir.
 - Boz'un çalışma klasörü: `C:\Users\<adın>\BozAgent\calisma`. Ayarlar: `...\BozAgent\ayarlar.json`.
@@ -87,6 +106,7 @@ Arka plandaki parçacıklar da Boz'un ruh haline göre renk ve hız değiştirir
 |---|---|
 | `app.py` | Pencereyi açar, arayüzü Codex'e bağlar |
 | `codex_bridge.py` | `codex exec --json` çalıştırır, olayları arayüze aktarır |
+| `codex_account.py` | Hesap, model listesi ve kullanım limitlerini okur (`codex app-server`) |
 | `pc_tools_server.py` | Ekran görüntüsü, tıklama, yazma… (MCP sunucusu) |
 | `AGENTS.md` | Boz'un kişiliği ve güvenlik kuralları |
 | `ui/` | Animasyonlu arayüz (HTML / CSS / JS) |

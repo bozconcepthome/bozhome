@@ -61,6 +61,8 @@ class CodexBridge:
         self.emit = emit
         self.workdir = workdir
         self.thread_id: str | None = None
+        self.ui_url = ""   # app.py doldurur: izin kartları için yerel adres
+        self.ui_token = ""
         self.proc: subprocess.Popen | None = None
         self.cmd_prefix = find_codex()
         self._lock = threading.Lock()
@@ -106,26 +108,33 @@ class CodexBridge:
 
     # ------------------------------------------------------------ komut
     def _build_cmd(self, settings: dict, resume: bool) -> list[str]:
-        safe = settings.get("mode", "onayli") == "onayli"
+        mode = normalize_mode(settings.get("mode"))
+        policy = {"akilli": "smart", "hepsi": "all", "serbest": "never"}[mode]
         py = Path(sys.executable)
         if IS_WIN and (py.parent / "pythonw.exe").exists():
             py = py.parent / "pythonw.exe"  # MCP sunucusu konsol penceresi açmasın
-        server = str(HERE / "pc_tools_server.py")
-        server_args = [server] + (["--confirm"] if safe else [])
+        server_args = [str(HERE / "pc_tools_server.py"), "--policy", policy]
+        if self.ui_url:
+            server_args += ["--ui-url", self.ui_url, "--token", self.ui_token]
 
         cfg = [
             f"mcp_servers.pc.command={_toml_str(str(py))}",
             "mcp_servers.pc.args=[" + ",".join(_toml_str(a) for a in server_args) + "]",
             "mcp_servers.pc.startup_timeout_sec=40",
             "mcp_servers.pc.tool_timeout_sec=600",
-            # Codex'in kendi MCP onayı arka planda verilemez; onayı pc_tools_server (--confirm) sorar
+            # Codex'in kendi MCP onayı arka planda verilemez; onayı pc_tools_server sorar
             'mcp_servers.pc.default_tools_approval_mode="approve"',
             'approval_policy="never"',
-            'sandbox_mode="workspace-write"' if safe else 'sandbox_mode="danger-full-access"',
+            # "Her şeyi sor" modunda komutlar sadece çalışma klasörüne yazabilir
+            'sandbox_mode="workspace-write"' if mode == "hepsi" else 'sandbox_mode="danger-full-access"',
             "sandbox_workspace_write.network_access=true",
         ]
         if settings.get("model"):
             cfg.append(f"model={_toml_str(settings['model'])}")
+        if settings.get("effort"):
+            cfg.append(f"model_reasoning_effort={_toml_str(settings['effort'])}")
+        if settings.get("fast"):
+            cfg.append('service_tier="priority"')
 
         cmd = list(self.cmd_prefix) + ["exec", "--json", "--skip-git-repo-check"]
         for c in cfg:
@@ -266,6 +275,11 @@ class CodexBridge:
             self.emit({"type": "todo", "items": items})
         elif it == "error":
             self.emit({"type": "log", "text": item.get("message", "")})
+
+
+def normalize_mode(m: str | None) -> str:
+    """Eski ayar değerlerini yeni izin modlarına çevirir."""
+    return {"onayli": "akilli", "akilli": "akilli", "hepsi": "hepsi", "serbest": "serbest"}.get(m or "", "akilli")
 
 
 def _friendly_error(msg: str) -> str:

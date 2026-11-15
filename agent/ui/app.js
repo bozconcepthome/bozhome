@@ -43,7 +43,7 @@
     idle: { e: .3, h: 190 }, listening: { e: .4, h: 175 }, thinking: { e: .9, h: 265 },
     looking: { e: .7, h: 200 }, acting: { e: 1, h: 160 }, typing: { e: .9, h: 150 },
     click: { e: 1, h: 160 }, talking: { e: .55, h: 210 }, happy: { e: 1.2, h: 130 },
-    error: { e: .8, h: 350 }, sleeping: { e: .08, h: 240 },
+    error: { e: .8, h: 350 }, sleeping: { e: .08, h: 240 }, asking: { e: .6, h: 45 },
   };
   function mood(m, ms) {
     const base = m === "click" ? "acting click" : m;
@@ -213,11 +213,21 @@
         finishStep(); if (ev.text) addMsg("bot", ev.text, true); break;
       case "log":
         addStep("ℹ️", ev.text, "ok"); break;
+      case "ask": return showAsk(ev);
+      case "ask_closed": return closeAsk(ev.id, "timeout");
+      case "models": models = ev.models || []; return renderModels();
+      case "account": account = ev; return renderUsage();
+      case "usage": usage = ev; return renderUsage();
       case "done":
         finishStep(); setBusy(false); setStatus("Bitti! Başka bir şey?");
+        if (ev.usage) {
+          const u = ev.usage, tot = (u.input_tokens || 0) + (u.output_tokens || 0);
+          if (tot) addStep("✅", `Görev bitti · ${tot >= 1000 ? (tot / 1000).toFixed(1).replace(".", ",") + "k" : tot} token`, "ok");
+        }
         if (!/talking/.test(boz.className)) mood("happy", 1600);
         confetti(); break;
       case "stopped":
+        Object.keys(asks).forEach((id) => closeAsk(id, "deny"));
         finishStep(false); setBusy(false); setStatus("Durduruldu"); addStep("⏹", "Görev durduruldu", "fail"); mood("idle"); break;
       case "error":
         finishStep(false); setBusy(false); addMsg("err", "⚠️ " + ev.text);
@@ -265,29 +275,200 @@
   $("#stage").addEventListener("dblclick", () => document.body.classList.contains("mini") && setMini(false));
   $("#btnMin").addEventListener("click", () => api.minimize());
   $("#btnClose").addEventListener("click", () => api.quit());
-  $("#btnSettings").addEventListener("click", () => $("#settings").classList.add("open"));
+  $("#btnSettings").addEventListener("click", () => openSettings());
   $("#btnCloseSettings").addEventListener("click", () => $("#settings").classList.remove("open"));
   $("#btnLogin").addEventListener("click", () => api.login());
   $("#btnNew").addEventListener("click", () => {
     api.new_chat(); msgs.innerHTML = ""; addStep("🧹", "Yeni sohbet başladı", "ok");
     $("#settings").classList.remove("open"); mood("happy", 1000);
   });
+  /* ================= Ayarlar: model, düşünme, izin modu ================= */
+  let models = [], usage = null, account = null;
+  const EFFORT = {
+    none: ["Yok", "Düşünmeden en hızlı cevap"], minimal: ["Minimum", "Çok hafif düşünme"],
+    low: ["Düşük", "Hızlı, basit işler için"], medium: ["Orta", "Günlük işler için dengeli"],
+    high: ["Yüksek", "Karmaşık işlerde daha dikkatli"], xhigh: ["Çok yüksek", "Zor işler için ekstra derin düşünme"],
+    max: ["Maksimum", "En zor işler; yavaş ve kullanım hakkını çok harcar"],
+    ultra: ["Ultra", "Maksimum düşünme + işi alt görevlere böler; en pahalısı"],
+  };
+  const MODE_LABEL = { akilli: "Akıllı", hepsi: "Her şeyi sor", serbest: "Serbest" };
+  const curModel = () => models.find((m) => m.id === settings.model) || models.find((m) => m.isDefault) || models[0];
+
   function applySettings() {
-    $("#setSafe").checked = settings.mode !== "serbest";
     $("#setVoice").checked = !!settings.voice;
-    $("#setModel").value = settings.model || "";
-    const b = $("#modeBadge");
-    b.textContent = settings.mode === "serbest" ? "Serbest" : "Onaylı";
-    b.classList.toggle("free", settings.mode === "serbest");
+    const mode = settings.mode || "akilli";
+    document.querySelectorAll("#modeCards button").forEach((b) => b.classList.toggle("on", b.dataset.mode === mode));
+    const badge = $("#modeBadge");
+    badge.textContent = MODE_LABEL[mode] || "Akıllı";
+    badge.classList.toggle("free", mode === "serbest");
+    badge.classList.toggle("all", mode === "hepsi");
+    renderModels();
   }
-  $("#setSafe").addEventListener("change", async (e) => {
-    if (!e.target.checked && !confirm("Serbest modda Boz izin sormadan tıklar, yazar ve komut çalıştırır. Emin misin?")) {
-      e.target.checked = true; return;
+
+  function renderModels() {
+    const sel = $("#setModel");
+    if (models.length) {
+      sel.innerHTML = models.map((m) =>
+        `<option value="${m.id}">${m.name}${m.isDefault ? " (varsayılan)" : ""}</option>`).join("");
+      sel.value = curModel()?.id || "";
     }
-    settings = await api.set_setting("mode", e.target.checked ? "onayli" : "serbest"); applySettings();
+    const m = curModel();
+    $("#modelDesc").textContent = m?.description || "";
+    const efforts = m?.efforts?.length ? m.efforts : ["low", "medium", "high"];
+    const eff = efforts.includes(settings.effort) ? settings.effort : (m?.defaultEffort || "medium");
+    $("#effortSeg").innerHTML = efforts.map((e) =>
+      `<button data-e="${e}" class="${e === eff ? "on" : ""}" title="${(EFFORT[e] || [e, ""])[1]}">${(EFFORT[e] || [e])[0]}</button>`).join("");
+    $("#effortDesc").textContent = (EFFORT[eff] || ["", ""])[1] + (eff === m?.defaultEffort ? " · bu modelin varsayılanı" : "");
+    const tier = m?.tiers?.find((t) => t.id === "priority") || m?.tiers?.[0];
+    $("#fastRow").classList.toggle("hidden", !tier);
+    $("#setFast").checked = !!settings.fast && !!tier;
+    if (tier?.description) $("#fastDesc").textContent = tr(tier.description);
+    // bilgi çubuğundaki model çipi
+    $("#modelChipText").textContent = m
+      ? `${m.name} · ${(EFFORT[eff] || [eff])[0]}${settings.fast && tier ? " ⚡" : ""}`
+      : "Varsayılan model";
+  }
+  const tr = (d) => d.replace(/2x speed, increased usage/i, "2 kat hızlı, kullanım hakkını daha çabuk bitirir");
+
+  $("#setModel").addEventListener("change", async (e) => {
+    settings = await api.set_setting("model", e.target.value);
+    const m = curModel();
+    if (m && settings.effort && !m.efforts.includes(settings.effort)) settings = await api.set_setting("effort", "");
+    renderModels(); pulse("#modelChip");
+  });
+  $("#effortSeg").addEventListener("click", async (e) => {
+    const b = e.target.closest("button"); if (!b) return;
+    const m = curModel();
+    settings = await api.set_setting("effort", b.dataset.e === m?.defaultEffort ? "" : b.dataset.e);
+    if (!settings.effort) settings.effort = "";
+    renderModels(); pulse("#modelChip");
+  });
+  $("#setFast").addEventListener("change", async (e) => { settings = await api.set_setting("fast", e.target.checked); renderModels(); });
+  $("#modeCards").addEventListener("click", async (e) => {
+    const b = e.target.closest("button"); if (!b) return;
+    if (b.dataset.mode === "serbest" && settings.mode !== "serbest" &&
+        !confirm("Serbest modda Boz hiç izin sormadan tıklar, yazar ve komut çalıştırır. Emin misin?")) return;
+    settings = await api.set_setting("mode", b.dataset.mode); applySettings(); pulse("#modeBadge");
   });
   $("#setVoice").addEventListener("change", async (e) => { settings = await api.set_setting("voice", e.target.checked); });
-  $("#setModel").addEventListener("change", async (e) => { settings = await api.set_setting("model", e.target.value.trim()); });
+  $("#btnRefreshUsage").addEventListener("click", () => { $("#btnRefreshUsage").textContent = "↻ Yenileniyor…"; api.refresh_usage(); });
+  $("#modelChip").addEventListener("click", () => openSettings());
+  $("#usageChip").addEventListener("click", () => openSettings());
+  function openSettings() { $("#settings").classList.add("open"); }
+  function pulse(sel) { const el = $(sel); el.animate([{ transform: "scale(1)" }, { transform: "scale(1.12)" }, { transform: "scale(1)" }], { duration: 400 }); }
+
+  /* ================= Kullanım hakkı ================= */
+  function winLabel(mins) {
+    if (!mins) return "Limit";
+    if (mins === 10080) return "Haftalık limit";
+    if (mins >= 1440 && mins % 1440 === 0) return `${mins / 1440} günlük limit`;
+    if (mins % 60 === 0) return `${mins / 60} saatlik limit`;
+    return `${mins} dakikalık limit`;
+  }
+  function untilText(ts) {
+    if (!ts) return "";
+    let s = Math.max(0, Math.round(ts - Date.now() / 1000));
+    const d = Math.floor(s / 86400); s -= d * 86400;
+    const h = Math.floor(s / 3600); s -= h * 3600;
+    const m = Math.ceil(s / 60);
+    const when = new Date(ts * 1000);
+    const clock = when.toLocaleString("tr-TR", d >= 1 ? { weekday: "long", hour: "2-digit", minute: "2-digit" } : { hour: "2-digit", minute: "2-digit" });
+    const left = d ? `${d} gün ${h} sa` : h ? `${h} sa ${m} dk` : `${m} dk`;
+    return `${left} sonra yenilenir (${clock})`;
+  }
+  const PLAN = { plus: "Plus", pro: "Pro", prolite: "Pro Lite", promax: "Pro Max", free: "Ücretsiz", go: "Go", team: "Team", business: "Business", enterprise: "Enterprise", edu: "Edu" };
+  function renderUsage() {
+    const box = $("#usageBars");
+    $("#btnRefreshUsage").textContent = "↻ Yenile";
+    if (account) {
+      const plan = PLAN[account.plan] || account.plan || "";
+      $("#accountLine").innerHTML = (plan ? `<span class="plan">ChatGPT ${plan}</span>` : "") +
+        `<span>${(account.email || "").replace(/</g, "&lt;")}</span>`;
+    }
+    if (!usage) return;
+    if (!usage.ok) {
+      box.innerHTML = `<div class="muted small">Kullanım bilgisi alınamadı. ${(usage.error || "").replace(/</g, "&lt;")}</div>`;
+      $("#usageChipText").textContent = "Kullanım ?";
+      return;
+    }
+    const wins = [usage.primary, usage.secondary].filter(Boolean);
+    let html = "";
+    if (usage.reached || usage.allowed === false) {
+      const w = wins.find((x) => x.used >= 100) || wins[0];
+      html += `<div class="limit-hit">⛔ Kullanım hakkın doldu. ${w ? untilText(w.resetsAt) : ""}</div>`;
+    }
+    for (const w of wins) {
+      const left = Math.max(0, 100 - w.used);
+      const cls = left <= 10 ? "bad" : left <= 30 ? "warn" : "";
+      html += `<div class="ubar ${cls}"><div class="top"><span>${winLabel(w.mins)}</span><b>%${left} kaldı</b></div>
+        <div class="track"><div class="fill" style="width:${left}%"></div></div>
+        <div class="reset">${untilText(w.resetsAt)}</div></div>`;
+    }
+    if (usage.credits) html += `<div class="muted small">💳 Ek kredi: ${usage.credits}</div>`;
+    if (!wins.length) html += `<div class="muted small">${usage.unlimited ? "Sınırsız kullanım ♾️" : "Limit bilgisi yok"}</div>`;
+    box.innerHTML = html;
+    // bilgi çubuğu
+    const p = usage.primary || usage.secondary;
+    if (p) {
+      const left = Math.max(0, 100 - p.used);
+      const sec = usage.secondary && usage.primary ? Math.max(0, 100 - usage.secondary.used) : null;
+      $("#usageChipText").textContent = `%${left} kaldı` + (sec != null ? ` · hafta %${sec}` : "");
+      const f = $("#usageChipFill");
+      f.style.width = left + "%";
+      f.style.background = left <= 10 ? "var(--bad)" : left <= 30 ? "#facc15" : "var(--ok)";
+      $("#usageChip").title = `${winLabel(p.mins)}: %${left} kaldı — ${untilText(p.resetsAt)}`;
+    }
+  }
+  setInterval(() => usage && document.querySelector("#settings.open") && renderUsage(), 30000);
+
+  /* ================= İzin kartı ================= */
+  const asks = {};
+  function showAsk(ev) {
+    if (document.body.classList.contains("mini")) setMini(false);
+    $(".welcome")?.remove();
+    finishStep();
+    const el = document.createElement("div");
+    el.className = "ask" + (ev.risky ? " risky" : "");
+    el.innerHTML = `<div class="q">${ev.risky ? "⚠️ Riskli işlem — Boz izin istiyor" : "🙋 Boz izin istiyor"}</div>
+      <div class="act"></div>
+      <div class="btns">
+        <button class="ok" data-a="once">✓ İzin ver</button>
+        ${ev.risky ? "" : '<button class="always" data-a="always">✓✓ Bu görevde hep izin ver</button>'}
+        <button class="no" data-a="deny">✕ Reddet</button>
+      </div>
+      <div class="timer"></div>`;
+    el.querySelector(".act").textContent = ev.action;
+    el.querySelector(".timer").animate([{ transform: "scaleX(1)" }, { transform: "scaleX(0)" }], { duration: (ev.timeout || 300) * 1000, fill: "forwards" });
+    el.addEventListener("click", (e) => {
+      const b = e.target.closest("button[data-a]"); if (!b) return;
+      api.answer(ev.id, b.dataset.a); closeAsk(ev.id, b.dataset.a);
+    });
+    msgs.appendChild(el); scroll();
+    asks[ev.id] = el;
+    mood("asking"); setStatus("İznini bekliyorum...");
+    chime();
+  }
+  function closeAsk(id, answer) {
+    const el = asks[id]; if (!el) return;
+    delete asks[id];
+    el.classList.add("done");
+    const r = document.createElement("div"); r.className = "result";
+    r.textContent = answer === "deny" ? "✕ Reddedildi" : answer === "always" ? "✓ Bu görev boyunca izin verildi" : answer === "timeout" ? "⌛ Süre doldu, reddedildi" : "✓ İzin verildi";
+    el.appendChild(r);
+    if (answer === "deny" || answer === "timeout") mood("error", 900); else mood("happy", 700);
+  }
+  function chime() {
+    try {
+      const c = new (window.AudioContext || window.webkitAudioContext)(), t = c.currentTime;
+      [660, 880].forEach((f, i) => {
+        const o = c.createOscillator(), g = c.createGain();
+        o.frequency.value = f; o.type = "sine";
+        g.gain.setValueAtTime(0, t + i * .12); g.gain.linearRampToValueAtTime(.08, t + i * .12 + .02);
+        g.gain.exponentialRampToValueAtTime(.0001, t + i * .12 + .25);
+        o.connect(g).connect(c.destination); o.start(t + i * .12); o.stop(t + i * .12 + .3);
+      });
+    } catch {}
+  }
 
   /* ================= Başlatma ================= */
   async function start(a) {
@@ -307,23 +488,39 @@
 
   function demoApi() {
     const emit = (ev, ms) => setTimeout(() => window.onAgentEvent(ev), ms);
-    let s = { mode: "onayli", voice: false, model: "" };
+    let s = { mode: "akilli", voice: false, model: "", effort: "", fast: false };
+    const now = Date.now() / 1000;
+    const usageEv = (p) => ({ type: "usage", ok: true, plan: "plus", primary: { used: p, mins: 300, resetsAt: now + 8040 }, secondary: { used: 41, mins: 10080, resetsAt: now + 3.2 * 86400 } });
+    const lv = ["low", "medium", "high", "xhigh", "max", "ultra"];
+    let askCb = null;
     return {
-      init: async () => (emit({ type: "status", ok: true }, 300), s),
+      init: async () => {
+        emit({ type: "status", ok: true }, 200);
+        emit({ type: "account", type2: "chatgpt", email: "ornek@mail.com", plan: "plus" }, 400);
+        emit({ type: "models", models: [
+          { id: "gpt-6.1-sol", name: "GPT-6.1-Sol", description: "En yeni varsayılan model.", isDefault: true, efforts: lv, defaultEffort: "low", tiers: [{ id: "priority", name: "Fast", description: "2x speed, increased usage" }] },
+          { id: "gpt-6-luna", name: "GPT-6-Luna", description: "Daha hafif ve ekonomik.", isDefault: false, efforts: lv.slice(0, 5), defaultEffort: "medium", tiers: [] },
+        ] }, 500);
+        emit(usageEv(28), 700);
+        return s;
+      },
       send: () => {
         emit({ type: "thinking", text: "Görevi planlıyorum..." }, 300);
-        emit({ type: "tool", phase: "started", tool: "screenshot", args: {} }, 1400);
-        emit({ type: "tool", phase: "completed", tool: "screenshot", status: "completed" }, 2600);
-        emit({ type: "tool", phase: "started", tool: "open_app_or_url", args: { target: "notepad" } }, 2800);
-        emit({ type: "tool", phase: "completed", tool: "open_app_or_url", status: "completed" }, 4000);
-        emit({ type: "tool", phase: "started", tool: "click", args: { x: 640, y: 380 } }, 4200);
-        emit({ type: "tool", phase: "completed", tool: "click", status: "completed" }, 5000);
-        emit({ type: "tool", phase: "started", tool: "type_text", args: { text: "Merhaba dünya!" } }, 5200);
-        emit({ type: "tool", phase: "completed", tool: "type_text", status: "completed" }, 6800);
-        emit({ type: "message", text: "(Demo) Not Defteri'ni açıp \"Merhaba dünya!\" yazdım. Gerçek kullanım için baslat.bat ile aç." }, 7000);
-        emit({ type: "done" }, 9200);
+        emit({ type: "tool", phase: "started", tool: "screenshot", args: {} }, 1200);
+        emit({ type: "tool", phase: "completed", tool: "screenshot", status: "completed" }, 2200);
+        emit({ type: "tool", phase: "started", tool: "press_keys", args: { keys: ["alt", "f4"] } }, 2400);
+        emit({ type: "ask", id: "d1", action: "Kısayol: alt+f4", risky: true, timeout: 300 }, 2600);
+        askCb = () => {
+          emit({ type: "tool", phase: "completed", tool: "press_keys", status: "completed" }, 200);
+          emit({ type: "tool", phase: "started", tool: "type_text", args: { text: "Merhaba dünya!" } }, 400);
+          emit({ type: "tool", phase: "completed", tool: "type_text", status: "completed" }, 1600);
+          emit({ type: "message", text: "(Demo) Pencereyi kapatıp \"Merhaba dünya!\" yazdım." }, 1800);
+          emit({ type: "done", usage: { input_tokens: 10500, output_tokens: 820 } }, 3600);
+          emit(usageEv(31), 3800);
+        };
       },
-      stop: () => emit({ type: "stopped" }, 100), new_chat() {}, login() {}, recheck() {},
+      answer: () => askCb && askCb(),
+      stop: () => emit({ type: "stopped" }, 100), new_chat() {}, login() {}, recheck() {}, refresh_usage: () => emit(usageEv(31), 400),
       set_setting: async (k, v) => ((s[k] = v), s), set_mini() {}, minimize() {}, quit() {},
     };
   }

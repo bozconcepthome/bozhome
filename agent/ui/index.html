@@ -16,7 +16,7 @@
     <div class="brand pywebview-drag-region">
       <span class="dot"></span>
       <b>Boz</b><span class="sub">Agent</span>
-      <span id="modeBadge" class="badge">Onaylı</span>
+      <span id="modeBadge" class="badge">Akıllı</span>
     </div>
     <div class="win-btns">
       <button id="btnMini" title="Mini mod">◱</button>
@@ -102,6 +102,12 @@
       </div>
     </div>
     <div id="setupCard" class="card hidden"></div>
+    <div id="infoBar">
+      <button id="modelChip" class="ichip" title="Model ve düşünme seviyesi"><span class="ic">✦</span><span id="modelChipText">Model yükleniyor…</span></button>
+      <button id="usageChip" class="ichip" title="ChatGPT kullanım hakkın">
+        <span class="mini-bar"><i id="usageChipFill"></i></span><span id="usageChipText">Kullanım…</span>
+      </button>
+    </div>
     <form id="composer" autocomplete="off">
       <textarea id="input" rows="1" placeholder="Boz'a bir görev ver..."></textarea>
       <button id="btnSend" type="submit" title="Gönder">➤</button>
@@ -112,24 +118,50 @@
 
 <!-- Ayarlar -->
 <aside id="settings">
-  <h3>Ayarlar</h3>
-  <label class="row">
-    <div><b>Onaylı mod</b><small>Her tıklama ve yazmadan önce izin ister (önerilir)</small></div>
-    <input type="checkbox" id="setSafe" class="toggle">
-  </label>
-  <label class="row">
-    <div><b>Sesli konuşma</b><small>Boz cevaplarını sesli okur</small></div>
-    <input type="checkbox" id="setVoice" class="toggle">
-  </label>
-  <label class="col">
-    <b>Model (boş = varsayılan)</b>
-    <input type="text" id="setModel" placeholder="Boş bırakabilirsin">
-  </label>
-  <button id="btnLogin" class="wide">🔑 ChatGPT ile giriş yap</button>
-  <button id="btnNew" class="wide ghost">🧹 Yeni sohbet</button>
-  <p class="hint">Acil durdurma: fareyi hızla ekranın <b>sol üst köşesine</b> götür
-    veya ■ düğmesine bas.</p>
-  <button id="btnCloseSettings" class="wide ghost">Kapat</button>
+  <div class="set-head">
+    <h3>Ayarlar</h3>
+    <button id="btnCloseSettings" class="x" title="Kapat">✕</button>
+  </div>
+
+  <section class="sec" id="secUsage">
+    <div class="sec-title"><span>📊 Kullanım hakkın</span><button id="btnRefreshUsage" class="link">↻ Yenile</button></div>
+    <div id="accountLine" class="muted">Hesap bilgisi yükleniyor…</div>
+    <div id="usageBars"><div class="muted small">Kullanım bilgisi yükleniyor…</div></div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-title"><span>🧠 Model</span></div>
+    <select id="setModel"><option value="">Varsayılan</option></select>
+    <div id="modelDesc" class="muted small"></div>
+    <div class="sub-title">Düşünme seviyesi</div>
+    <div id="effortSeg" class="seg"></div>
+    <div id="effortDesc" class="muted small"></div>
+    <label class="row slim" id="fastRow">
+      <div><b>⚡ Hızlı mod</b><small id="fastDesc">2 kat hızlı, kullanım hakkını daha çabuk bitirir</small></div>
+      <input type="checkbox" id="setFast" class="toggle">
+    </label>
+  </section>
+
+  <section class="sec">
+    <div class="sec-title"><span>🛡️ İzinler</span></div>
+    <div id="modeCards" class="mode-cards">
+      <button data-mode="akilli"><b>🧠 Akıllı <em>önerilen</em></b><small>Sadece riskli işlemlerde sorar (Alt+F4, Shift+Delete, program dosyası çalıştırma). Silme, satın alma gibi işleri Boz yapmadan önce sohbette sorar.</small></button>
+      <button data-mode="hepsi"><b>✋ Her şeyi sor</b><small>Her tıklama ve yazmada sorar. "Bu görevde hep izin ver" ile o görev boyunca bir daha sormaz.</small></button>
+      <button data-mode="serbest"><b>🚀 Serbest</b><small>Hiç sormaz. Sadece tamamen güvendiğin işlerde kullan.</small></button>
+    </div>
+  </section>
+
+  <section class="sec">
+    <label class="row slim">
+      <div><b>🔊 Sesli konuşma</b><small>Boz cevaplarını sesli okur</small></div>
+      <input type="checkbox" id="setVoice" class="toggle">
+    </label>
+    <div class="btn-row">
+      <button id="btnNew" class="wide ghost">🧹 Yeni sohbet</button>
+      <button id="btnLogin" class="wide ghost">🔑 Hesap değiştir</button>
+    </div>
+    <p class="hint">Acil durdurma: ■ düğmesi veya fareyi hızla ekranın <b>sol üst köşesine</b> götür.</p>
+  </section>
 </aside>
 
 <script src="app.js"></script>
