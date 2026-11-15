@@ -202,17 +202,26 @@ def type_text(text: str, press_enter: bool = False) -> str:
     return f"Yazıldı: {action}"
 
 
+MODIFIERS = {"ctrl", "control", "alt", "shift", "win", "winleft", "winright", "command", "option", "altgr"}
+
+
 @mcp.tool()
 def press_keys(keys: list[str]) -> str:
-    """Kısayol tuşuna basar. Örnek: ["ctrl","c"], ["win","r"], ["alt","tab"], ["enter"]."""
-    action = "Tuş: " + "+".join(keys)
+    """Tuşa veya kısayola basar.
+    - Ctrl/Alt/Shift/Win içeriyorsa AYNI ANDA basılır: ["ctrl","c"], ["win","r"], ["alt","tab"].
+    - İçermiyorsa SIRAYLA basılır: ["enter"], ["down","down","enter"], ["tab","tab"].
+    Metin/kelime yazmak için bunu DEĞİL type_text aracını kullan."""
+    keys = [k.lower().strip() for k in keys]
+    combo = len(keys) > 1 and any(k in MODIFIERS for k in keys)
+    action = ("Kısayol: " + "+".join(keys)) if combo else ("Tuşlar (sırayla): " + ", ".join(keys))
     if not _ask_permission(action):
         return _denied(action)
-    keys = [k.lower() for k in keys]
-    if len(keys) == 1:
-        pyautogui.press(keys[0])
-    else:
+    if combo:
         pyautogui.hotkey(*keys)
+    else:
+        for k in keys:
+            pyautogui.press(k)
+            time.sleep(0.05)
     return f"Basıldı: {action}"
 
 

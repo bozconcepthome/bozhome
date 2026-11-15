@@ -174,7 +174,7 @@
     let extra = "";
     if (name === "click") extra = ` (${a.x}, ${a.y})`;
     else if (name === "type_text") extra = `: "${String(a.text || "").slice(0, 40)}"`;
-    else if (name === "press_keys") extra = `: ${(a.keys || []).join("+")}`;
+    else if (name === "press_keys") { const k = a.keys || []; extra = `: ${k.join(/ctrl|alt|shift|win/i.test(k.join()) && k.length > 1 ? "+" : ", ")}`; }
     else if (name === "open_app_or_url") extra = `: ${a.target || ""}`;
     else if (name === "focus_window") extra = `: ${a.title_contains || ""}`;
     else if (name === "web_search") extra = `: ${a.query || ""}`;
