@@ -25,6 +25,13 @@ Maçı yazarsın (ev sahibi, deplasman, tarih), uygulama:
 
 Veri yoksa uydurmaz: “Doğrulanamadı” yazar, grafikte ara nokta üretmez.
 
+## ChatGPT ile kullanım (API anahtarı gerekmez)
+
+**ChatGPT ile araştır** düğmesi promptun tamamını (maç bilgileri ve varsa The Odds API'den
+hesaplanan gerçek oran hareketleriyle) panoya kopyalar ve tarayıcında chatgpt.com'u açar.
+Mesaj kutusuna **Ctrl+V** yapıp gönder. ChatGPT kendi hesabınla (aboneliğinle) araştırır;
+şifren bu uygulamaya hiç girmez. ChatGPT'de web aramasının açık olduğundan emin ol.
+
 ## Kurulum (Windows)
 
 1. [python.org](https://www.python.org/downloads/) üzerinden Python 3.10+ kur (kurulumda *Add to PATH* işaretle).

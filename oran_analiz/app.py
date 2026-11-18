@@ -86,7 +86,7 @@ class App(tk.Tk):
         self.v_odds = tk.StringVar(value=self.conf.get("odds_key", ""))
         self.v_ant = tk.StringVar(value=self.conf.get("anthropic_key", ""))
         self.v_use_odds = tk.BooleanVar(value=self.conf.get("use_odds", True))
-        self.v_use_web = tk.BooleanVar(value=self.conf.get("use_web", True))
+        self.v_use_web = tk.BooleanVar(value=self.conf.get("use_web", False))
         self.v_plan = tk.StringVar(value=self.conf.get("plan", "Standart (9 nokta)"))
         self.v_regions = tk.StringVar(value=self.conf.get("regions", "eu,uk"))
         self.v_effort = tk.StringVar(value=self.conf.get("effort", "high"))
@@ -115,6 +115,7 @@ class App(tk.Tk):
         self.btn_run.pack(fill="x")
         self.btn_stop = ttk.Button(b, text="Durdur", command=self.stop.set, state="disabled")
         self.btn_stop.pack(fill="x", pady=4)
+        ttk.Button(b, text="ChatGPT ile arastir", command=self.ask_chatgpt).pack(fill="x", pady=4)
         ttk.Button(b, text="HTML rapor kaydet", command=self.save_html).pack(fill="x", pady=4)
         ttk.Button(b, text="Ligleri listele", command=self.list_leagues).pack(fill="x")
 
@@ -210,7 +211,9 @@ class App(tk.Tk):
             messagebox.showwarning("Kaynak", "En az bir veri kaynagi secin.")
             return
         if self.v_use_web.get() and not self.v_ant.get().strip() and not os.environ.get("ANTHROPIC_API_KEY"):
-            messagebox.showwarning("Anahtar", "Claude web ajani icin Anthropic API anahtari gerekli.")
+            messagebox.showwarning("Anahtar", "Claude web ajani icin Anthropic API anahtari gerekli.\n"
+                                   "Anahtarin yoksa kutunun isaretini kaldir; arastirma icin "
+                                   "'ChatGPT ile arastir' dugmesini kullan.")
             return
         self._save()
         for t in (self.t_report, self.t_web, self.t_log):
@@ -290,6 +293,30 @@ class App(tk.Tk):
         self.status.set(f"Bitti: {len(res.pre)} mac oncesi seri, {len(res.live)} canli seri. "
                         f"HTML raporu kaydedebilirsiniz.")
         self.nb.select(0)
+
+    def ask_chatgpt(self):
+        """Promptu (varsa gercek oran verisiyle) panoya kopyalar ve ChatGPT'yi tarayicida acar."""
+        import chatgpt_bridge
+        home, away, date = self.v_home.get().strip(), self.v_away.get().strip(), self.v_date.get().strip()
+        if not home or not away:
+            messagebox.showwarning("Eksik", "Ev sahibi ve deplasman takimini yazin.")
+            return
+        summary = ""
+        if self.result and self.result.pre:
+            summary = engine._summary(self.result.pre)
+        prompt = chatgpt_bridge.build_prompt(home, away, date, summary)
+        self.clipboard_clear()
+        self.clipboard_append(prompt)
+        self.update()
+        auto = chatgpt_bridge.open_chatgpt(prompt)
+        extra = "" if summary else ("\n\nIpucu: Once The Odds API ile ANALIZ ET calistirirsan gercek oran "
+                                    "verileri de ChatGPT'ye eklenir.")
+        if auto:
+            msg = "ChatGPT tarayicida acildi ve prompt yazildi. Gonder tusuna basman yeterli."
+        else:
+            msg = ("ChatGPT tarayicida acildi. Prompt panoya kopyalandi:\n"
+                   "mesaj kutusuna tikla, Ctrl+V ile yapistir ve gonder.")
+        messagebox.showinfo("ChatGPT", msg + "\n\nChatGPT'de web aramasinin acik oldugundan emin ol." + extra)
 
     def save_html(self):
         if not self.result:
