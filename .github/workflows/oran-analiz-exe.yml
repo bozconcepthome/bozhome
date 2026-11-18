@@ -1,0 +1,32 @@
+name: Oran Analiz EXE
+
+on:
+  push:
+    paths:
+      - "oran_analiz/**"
+      - ".github/workflows/oran-analiz-exe.yml"
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: oran_analiz
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Paketleri kur
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt pyinstaller pytest
+      - name: Testler
+        run: python -m pytest -q tests
+      - name: EXE olustur
+        run: pyinstaller --noconfirm --onefile --windowed --name OranAnaliz app.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: OranAnaliz-Windows
+          path: oran_analiz/dist/OranAnaliz.exe
