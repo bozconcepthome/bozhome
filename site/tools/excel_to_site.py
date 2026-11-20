@@ -7,7 +7,7 @@ Kullanım:
 - Arşivlenmiş, çoklanan ve fiyatı girilmemiş ürünler atlanır.
 - "Stok girmeniz gerekmektedir" durumundaki ürünler "Tükendi" olarak eklenir.
 - Aynı Model Kodu'na sahip satırlar tek ürünün renk varyantları olur.
-- Görseller indirilir, WebP'ye çevrilir (büyük + küçük) ve site/assets/urun/ altına yazılır.
+- Görseller orijinal çözünürlükte (1200x1800) indirilir, WebP'ye çevrilir (tam boy + kart boyu) ve site/assets/urun/ altına yazılır.
 - Çıktı: site/assets/js/urunler.js
 """
 import concurrent.futures as cf
@@ -27,7 +27,8 @@ warnings.filterwarnings("ignore")
 SITE = Path(__file__).resolve().parent.parent
 IMG_DIR = SITE / "assets" / "urun"
 OUT = SITE / "assets" / "js" / "urunler.js"
-BUYUK, KUCUK = 1200, 560
+BUYUK = 1800   # uzun kenar: Trendyol orijinali 1200x1800, küçültülmeden saklanır
+KUCUK = 720    # kart görselleri için genişlik
 
 # Trendyol kategori adı -> sitedeki koleksiyon
 KOLEKSIYON = {
@@ -95,8 +96,8 @@ def gorsel_indir(url):
             with urllib.request.urlopen(urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"}), timeout=40) as r:
                 veri = r.read()
             im = Image.open(io.BytesIO(veri)).convert("RGB")
-            x = im.copy(); x.thumbnail((BUYUK, BUYUK), Image.LANCZOS); x.save(b, "WEBP", quality=80, method=5)
-            y = im.copy(); y.thumbnail((KUCUK, KUCUK), Image.LANCZOS); y.save(k, "WEBP", quality=76, method=5)
+            x = im.copy(); x.thumbnail((BUYUK, BUYUK), Image.LANCZOS); x.save(b, "WEBP", quality=90, method=6)
+            y = im.copy(); y.thumbnail((KUCUK, KUCUK * 3), Image.LANCZOS); y.save(k, "WEBP", quality=82, method=6)
             return h
         except Exception as e:  # noqa
             hata = e

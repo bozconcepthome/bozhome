@@ -57,7 +57,7 @@
 
     $("#pdp").innerHTML = `
       <div class="gallery">
-        <div class="pdp-media"><img id="main-img" alt=""><span class="badge" id="badge" hidden></span></div>
+        <div class="pdp-media" id="media" role="button" tabindex="0" aria-label="Fotoğrafı tam ekran aç"><img id="main-img" alt=""><span class="badge" id="badge" hidden></span><span class="zoom-hint" id="zoom-hint"></span></div>
         <div class="thumbs" id="thumbs" role="group" aria-label="Ürün fotoğrafları"></div>
       </div>
       <div class="pdp-info">
@@ -127,7 +127,40 @@
       img.src = gorselYol(v.gorseller[gi]);
       img.alt = `${u.ad}${v.renk ? " – " + v.renk : ""}, fotoğraf ${gi + 1}`;
       $("#thumbs").querySelectorAll("button").forEach((b, j) => b.setAttribute("aria-current", j === gi));
+      $("#zoom-hint").textContent = `${gi + 1} / ${v.gorseller.length} · Büyüt`;
+      if (!$("#lb").hidden) lbCiz();
     };
+
+    /* ---- Tam ekran fotoğraf görüntüleyici ---- */
+    document.body.insertAdjacentHTML("beforeend", `<div class="lightbox" id="lb" hidden role="dialog" aria-modal="true" aria-label="Fotoğraf görüntüleyici">
+      <img id="lb-img" alt="">
+      <button class="lb-btn lb-close" type="button" id="lb-close" aria-label="Kapat">×</button>
+      <button class="lb-btn lb-prev" type="button" id="lb-prev" aria-label="Önceki fotoğraf">‹</button>
+      <button class="lb-btn lb-next" type="button" id="lb-next" aria-label="Sonraki fotoğraf">›</button>
+      <div class="lb-count" id="lb-count"></div></div>`);
+    const lbCiz = () => {
+      $("#lb-img").src = gorselYol(v.gorseller[gi]);
+      $("#lb-img").alt = $("#main-img").alt;
+      $("#lb-count").textContent = `${gi + 1} / ${v.gorseller.length}`;
+      $("#lb-prev").hidden = $("#lb-next").hidden = v.gorseller.length < 2;
+    };
+    const lbAc = () => { $("#lb").hidden = false; document.body.style.overflow = "hidden"; lbCiz(); $("#lb-close").focus(); };
+    const lbKapat = () => { $("#lb").hidden = true; document.body.style.overflow = ""; $("#media").focus(); };
+    $("#media").addEventListener("click", lbAc);
+    $("#media").addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); lbAc(); } });
+    $("#lb-close").onclick = lbKapat;
+    $("#lb-prev").onclick = () => foto(gi - 1);
+    $("#lb-next").onclick = () => foto(gi + 1);
+    $("#lb").addEventListener("click", (e) => { if (e.target.id === "lb") lbKapat(); });
+    document.addEventListener("keydown", (e) => {
+      if ($("#lb").hidden) return;
+      if (e.key === "Escape") lbKapat();
+      if (e.key === "ArrowLeft") foto(gi - 1);
+      if (e.key === "ArrowRight") foto(gi + 1);
+    });
+    let lx = null;
+    $("#lb").addEventListener("touchstart", (e) => { lx = e.touches[0].clientX; }, { passive: true });
+    $("#lb").addEventListener("touchend", (e) => { if (lx === null) return; const dx = e.changedTouches[0].clientX - lx; if (Math.abs(dx) > 40) foto(gi + (dx < 0 ? 1 : -1)); lx = null; });
 
     $("#thumbs").addEventListener("click", (e) => { const b = e.target.closest("button"); if (b) foto(+b.dataset.i); });
     // Kaydırma (mobil) ile fotoğraf değiştirme
