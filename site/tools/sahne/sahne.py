@@ -64,6 +64,10 @@ def noise_tex(m, b, scale, c1, c2, bump=0.0, detail=8):
 
 
 studio = SHOT.startswith('studyo')
+# Sehpa halının ÜSTÜNE oturur (salon sahnesinde halı 8 mm)
+HALI = 0.0 if studio else 0.008
+for o in parts:
+    o.location.z += HALI
 
 if studio:
     # ------------------------------------------------ sonsuz fon stüdyo
@@ -137,7 +141,7 @@ else:
     # Halı: kırık beyaz, bukle doku
     hali_m, hb = mat('hali', (0.78, 0.74, 0.67), rough=1.0)
     noise_tex(hali_m, hb, 320, (0.7, 0.66, 0.59), (0.83, 0.8, 0.74), bump=0.6, detail=4)
-    box('hali', (2.4, 1.8, 0.012), (0.7, -0.35, 0.006), hali_m, bevel=0.004)
+    box('hali', (2.4, 1.8, 0.008), (0.7, -0.35, 0.004), hali_m, bevel=0.003)
 
     # Kanepe: gri bukle kumaş, sehpanın sağında
     kum_m, kb = mat('kumas', (0.36, 0.35, 0.33), rough=1.0)
@@ -176,7 +180,7 @@ kitap1, kb1 = mat('kitap1', (0.32, 0.09, 0.045), rough=0.6)
 kitap2, kb2 = mat('kitap2', (0.86, 0.83, 0.76), rough=0.7)
 sayfa, _ = mat('sayfa', (0.93, 0.91, 0.85), rough=0.8)
 seramik, _ = mat('seramik', (0.9, 0.88, 0.84), rough=0.25, coat=0.6)
-top = HZ
+top = HZ + HALI
 box('kitap_alt', (0.24, 0.17, 0.028), (-0.04, -0.01, top + 0.014 + 0.003), kitap2, bevel=0.002, rot=(0, 0, math.radians(-6)))
 box('kitap_ust', (0.2, 0.145, 0.022), (-0.03, -0.02, top + 0.028 + 0.011 + 0.003), kitap1, bevel=0.002, rot=(0, 0, math.radians(9)))
 bpy.ops.mesh.primitive_cylinder_add(vertices=64, radius=0.042, depth=0.09, location=(0.12, 0.05, top + 0.048))
