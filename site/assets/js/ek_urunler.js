@@ -35,7 +35,7 @@ window.EK_URUNLER = [
         fiyat: 0,                                   // TODO: satış fiyatı
         piyasa: 0,
         stok: false,
-        gorseller: ["s-tel-salon", "s-tel-studyo", "s-tel-salon-on", "s-tel-studyo-on", "s-tel-detay"],
+        gorseller: ["s-tel-salon", "s-tel-studyo", "s-tel-salon-on", "s-tel-studyo-on"],
       },
     ],
   },

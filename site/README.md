@@ -47,7 +47,7 @@ Henüz Trendyol'a girilmemiş ürünler `assets/js/ek_urunler.js` dosyasındadı
 
 ### S Tel Yan Sehpa (3D modelden sahnelendi)
 
-`MODEL.obj` dosyasından Blender (Cycles) ile 5 görsel üretildi: iki salon çekimi, bir yakın çekim, iki stüdyo çekimi (1200×1800). Ürün sayfasındaki **3D olarak incele** düğmesi `assets/3d/s-tel-yan-sehpa.glb` modelini döndürülebilir olarak açar (model-viewer, ilk tıklamada yüklenir).
+`MODEL.obj` dosyasından Blender (Cycles) ile 4 görsel üretildi: iki salon çekimi, iki stüdyo çekimi (1200×1800). Ürün sayfasındaki **3D olarak incele** düğmesi `assets/3d/s-tel-yan-sehpa.glb` modelini döndürülebilir olarak açar (model-viewer, ilk tıklamada yüklenir).
 
 - Model dosyasında malzeme (MTL) olmadığı için renk **mat siyah toz boya** olarak seçildi. Başka renkler istenirse aynı sahne betiğiyle render alınabilir.
 - Ölçüler (51 × 43 × 45 cm) modelin milimetre olduğu varsayılarak hesaplandı; üretim ölçüsüyle karşılaştırın.
