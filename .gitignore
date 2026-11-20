@@ -2,3 +2,4 @@ node_modules/
 animasyon/cikti/
 __pycache__/
 animasyon/public/*/.onbellek/
+site/tools/*.xlsx

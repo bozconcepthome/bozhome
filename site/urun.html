@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ürün — Boz Concept Home</title>
+  <meta name="description" content="Boz Concept Home ürün detayı.">
+  <meta name="theme-color" content="#f4ecdc">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='48' fill='%23dfa63a'/%3E%3Ctext x='50' y='68' font-size='54' text-anchor='middle' font-family='Georgia' fill='%231d2a2e'%3EB%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,500;0,6..96,600;1,6..96,500&family=Jost:wght@400;500;600&family=Yellowtail&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body class="has-sticky">
+  <div id="site-header"></div>
+
+  <main class="wrap">
+    <nav class="crumbs" aria-label="Konum"><a href="index.html">Ana sayfa</a> / <a id="crumb-kol" href="index.html#koleksiyon">Koleksiyon</a> / <span id="crumb"></span></nav>
+    <div class="pdp" id="pdp"></div>
+
+    <section class="section" style="padding-top:20px" aria-labelledby="related-title">
+      <div class="section-head">
+        <span class="eyebrow both">Bununla iyi gider</span>
+        <h2 id="related-title">Köşeyi <em class="ital">tamamlayın</em></h2>
+      </div>
+      <div class="grid" id="related"></div>
+    </section>
+  </main>
+
+  <div class="sticky-buy" id="sticky-buy"></div>
+  <div id="site-footer"></div>
+
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/urunler.js"></script>
+  <script src="assets/js/app.js"></script>
+  <script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const B = window.BOZ;
+    const { M, URUNLER, para, paraKurus, esc, urunBul, varyantBul, anaVaryant, gorselYol, stokta, indirimYuzde, kartHTML, ikon, Sepet, sepeteEkle, belirt } = B;
+    const $ = (s) => document.querySelector(s);
+    const params = new URLSearchParams(location.search);
+    const u = urunBul(params.get("id")) || urunBul(M.vitrinUrun) || URUNLER[0];
+    let v = params.get("v") ? varyantBul(u, params.get("v")) : anaVaryant(u);
+    let gi = 0, adet = 1;
+
+    document.title = `${u.ad} — ${M.ad}`;
+    $('meta[name="description"]').content = (u.aciklama[0] || u.tamAd).slice(0, 160);
+    $("#crumb").textContent = u.ad;
+    $("#crumb-kol").textContent = u.koleksiyon;
+    $("#crumb-kol").href = `index.html?k=${encodeURIComponent(u.koleksiyon)}#koleksiyon`;
+
+    const faizsiz = M.taksitler.filter(t => t.oran === 0 && t.ay > 1).map(t => t.ay);
+    const enCok = faizsiz.length ? Math.max(...faizsiz) : 0;
+    const videolar = (M.videolar || []).filter(x => x.urun === u.id);
+    const renkli = u.varyantlar.some(x => x.renk) && u.varyantlar.length > 1;
+    const ilk = u.aciklama.slice(0, 2), kalan = u.aciklama.slice(2);
+
+    $("#pdp").innerHTML = `
+      <div class="gallery">
+        <div class="gallery-glow" id="glow" aria-hidden="true"></div>
+        <div class="pdp-media"><img id="main-img" alt=""><span class="badge" id="badge" hidden></span></div>
+        <div class="thumbs" id="thumbs" role="group" aria-label="Ürün fotoğrafları"></div>
+        ${videolar.length ? `<div class="pdp-video"><h3 style="margin-bottom:16px">Videoda izleyin</h3><div class="reels" style="justify-content:start">${videolar.map(B.videoHTML).join("")}</div></div>` : ""}
+      </div>
+      <div class="pdp-info">
+        <span class="eyebrow">${esc(u.kategori)}</span>
+        <h1>${esc(u.ad)}</h1>
+        <div class="sub">${u.olcu ? `${esc(u.olcu)} cm` : esc(u.koleksiyon)}</div>
+        <div class="pdp-price"><span class="price" id="price"></span></div>
+        <div class="installment-hint" id="inst"></div>
+
+        ${renkli ? `<div class="swatch-label">Renk: <b id="renk-ad"></b></div>
+          <div class="swatches" role="radiogroup" aria-label="Renk seçin">${u.varyantlar.map(x =>
+            `<button type="button" class="swatch${x.stok ? "" : " out"}" role="radio" data-b="${x.barkod}" style="background:${x.hex}" aria-label="${esc(x.renk)}${x.stok ? "" : " (tükendi)"}" title="${esc(x.renk)}${x.stok ? "" : " – tükendi"}"></button>`).join("")}</div>` : ""}
+
+        <div class="pdp-buy">
+          <div class="qty" role="group" aria-label="Adet">
+            <button type="button" id="q-minus" aria-label="Azalt">−</button>
+            <span id="q-val" aria-live="polite">1</span>
+            <button type="button" id="q-plus" aria-label="Artır">+</button>
+          </div>
+          <button class="btn btn-ghost btn-lg" type="button" id="add">${ikon.bag} Sepete ekle</button>
+          <button class="btn btn-coral btn-lg btn-quick" type="button" id="buy-now">Hemen al ${ikon.lock}</button>
+        </div>
+
+        <ul class="perks">
+          <li>${ikon.truck}<span id="perk-ship"></span></li>
+          <li>${ikon.cash}<span>Kapıda nakit ya da kartla ödeme</span></li>
+          <li>${ikon.ret}<span>${M.iadeGunu} gün içinde kolay iade</span></li>
+        </ul>
+
+        <h3 style="margin:26px 0 12px">Ürün hakkında</h3>
+        <div class="desc">
+          ${ilk.map(p => `<p>${esc(p)}</p>`).join("") || `<p>${esc(u.tamAd)}</p>`}
+          ${kalan.length ? `<details><summary>Devamını oku</summary>${kalan.map(p => `<p>${esc(p)}</p>`).join("")}</details>` : ""}
+        </div>
+        <table class="spec" style="margin-top:14px">
+          <tr><th>Ürün adı</th><td>${esc(u.tamAd)}</td></tr>
+          ${u.olcu ? `<tr><th>Ölçü</th><td>${esc(u.olcu)} cm</td></tr>` : ""}
+          <tr><th>Kategori</th><td>${esc(u.kategori)}</td></tr>
+          <tr><th>Stok kodu</th><td id="sku"></td></tr>
+        </table>
+        ${u.trendyol ? `<a class="ty-link" href="${esc(u.trendyol)}" target="_blank" rel="noopener">Bu ürünün Trendyol değerlendirmelerini görün ↗</a>` : ""}
+      </div>`;
+
+    const ciz = () => {
+      const ind = indirimYuzde(v);
+      $("#price").innerHTML = `${para(v.fiyat)}${ind >= 5 ? `<s>${para(v.piyasa)}</s>` : ""}`;
+      $("#inst").textContent = enCok ? `Peşin fiyatına ${enCok} taksit: ayda ${paraKurus(v.fiyat / enCok)}` : "Taksit seçenekleri ödeme adımında";
+      $("#perk-ship").innerHTML = `<b>${M.kargoSuresi}</b> içinde kargoda · ${v.fiyat >= M.ucretsizKargoLimiti ? "<b>Ücretsiz kargo</b>" : `${para(M.ucretsizKargoLimiti)} üzeri ücretsiz`}`;
+      $("#sku").textContent = v.sku || v.barkod;
+      const badge = $("#badge");
+      badge.hidden = !(ind >= 5 || !v.stok);
+      badge.className = "badge " + (v.stok ? "sale" : "out");
+      badge.textContent = v.stok ? `%${ind} indirim` : "Bu renk tükendi";
+      if ($("#renk-ad")) $("#renk-ad").textContent = v.renk + (v.stok ? "" : " (tükendi)");
+      document.querySelectorAll(".swatch").forEach(s => s.setAttribute("aria-checked", s.dataset.b === v.barkod));
+      ["#add", "#buy-now"].forEach(s => { $(s).disabled = !v.stok; });
+      $("#buy-now").innerHTML = v.stok ? `Hemen al ${ikon.lock}` : "Tükendi";
+      $("#thumbs").innerHTML = v.gorseller.length > 1 ? v.gorseller.map((g, i) =>
+        `<button type="button" data-i="${i}" aria-label="Fotoğraf ${i + 1}"><img src="${gorselYol(g, true)}" alt="" loading="lazy"></button>`).join("") : "";
+      $("#sticky-buy").innerHTML = `<span class="price">${para(v.fiyat)}</span>
+        <button class="btn btn-coral" type="button" ${v.stok ? `data-add="${u.id}" data-v="${v.barkod}"` : "disabled"}>${v.stok ? "Sepete ekle" : "Tükendi"}</button>`;
+      foto(0);
+    };
+    const foto = (i) => {
+      gi = (i + v.gorseller.length) % v.gorseller.length;
+      const img = $("#main-img");
+      img.src = gorselYol(v.gorseller[gi]);
+      img.alt = `${u.ad}${v.renk ? " – " + v.renk : ""}, fotoğraf ${gi + 1}`;
+      $("#glow").style.backgroundImage = `url(${gorselYol(v.gorseller[gi], true)})`;
+      $("#thumbs").querySelectorAll("button").forEach((b, j) => b.setAttribute("aria-current", j === gi));
+    };
+
+    $("#thumbs").addEventListener("click", (e) => { const b = e.target.closest("button"); if (b) foto(+b.dataset.i); });
+    // Kaydırma (mobil) ile fotoğraf değiştirme
+    let x0 = null;
+    $(".pdp-media").addEventListener("touchstart", (e) => { x0 = e.touches[0].clientX; }, { passive: true });
+    $(".pdp-media").addEventListener("touchend", (e) => { if (x0 === null) return; const dx = e.changedTouches[0].clientX - x0; if (Math.abs(dx) > 40) foto(gi + (dx < 0 ? 1 : -1)); x0 = null; });
+    document.querySelectorAll(".swatch").forEach(s => s.addEventListener("click", () => {
+      v = varyantBul(u, s.dataset.b); ciz();
+      const url = new URL(location); url.searchParams.set("v", v.barkod); history.replaceState(null, "", url);
+    }));
+    $("#q-minus").onclick = () => { adet = Math.max(1, adet - 1); $("#q-val").textContent = adet; };
+    $("#q-plus").onclick = () => { adet = Math.min(20, adet + 1); $("#q-val").textContent = adet; };
+    $("#add").onclick = () => sepeteEkle(u.id, v.barkod, adet);
+    $("#buy-now").onclick = () => { if (!v.stok) return; Sepet.ekle(u.id, v.barkod, adet); location.href = "odeme.html"; };
+    ciz();
+    B.videolariBagla($("#pdp"));
+
+    const benzer = URUNLER.filter(x => x.id !== u.id && stokta(x))
+      .sort((a, b) => (b.kategori === u.kategori) - (a.kategori === u.kategori) || (b.koleksiyon === u.koleksiyon) - (a.koleksiyon === u.koleksiyon))
+      .slice(0, 4);
+    $("#related").innerHTML = benzer.map(kartHTML).join("");
+    belirt();
+  });
+  </script>
+</body>
+</html>
