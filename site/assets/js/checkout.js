@@ -18,7 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (!Sepet.satirlar().length) {
     kok.innerHTML = `<div class="success"><div class="seal">${yildiz(18)}<span>🛒</span></div>
       <h1>Sepetiniz boş</h1><p>Ödeme yapmak için önce sepete ürün ekleyin.</p>
-      <a class="btn btn-coral btn-lg" href="index.html#koleksiyon">Alışverişe dön</a></div>`;
+      <a class="btn btn-primary btn-lg" href="index.html#koleksiyon">Alışverişe dön</a></div>`;
     return;
   }
 
@@ -112,7 +112,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <label class="check"><input type="checkbox" id="sozlesme" required> <span><a href="#" onclick="return false">Ön bilgilendirme formunu</a> ve <a href="#" onclick="return false">mesafeli satış sözleşmesini</a> okudum, onaylıyorum.</span></label>
         <div class="err">Devam etmek için sözleşmeyi onaylayın.</div>
       </div>
-      <button class="btn btn-coral btn-block btn-lg" type="submit" id="submit"></button>
+      <button class="btn btn-primary btn-block btn-lg" type="submit" id="submit"></button>
       <p style="text-align:center;font-size:.84rem;color:var(--ink-soft);margin-top:12px">${M.iadeGunu} gün içinde koşulsuz iade · ${M.kargoSuresi} içinde kargoda</p>
     </div>
 
@@ -317,7 +317,7 @@ document.addEventListener("DOMContentLoaded", () => {
       ${s.yontem === "havale" ? `<div class="iban" style="text-align:left;margin:0 auto 20px;max-width:440px"><span><small style="display:block;font-family:var(--sans);color:var(--ink-soft)">${esc(M.banka.ad)} · ${esc(M.banka.alici)}</small>${esc(M.banka.iban)}</span></div>` : ""}
       <p style="color:var(--ink-soft)">Teslimat: ${esc(s.adres.ilce)} / ${esc(s.adres.il)} · ${M.kargoSuresi} içinde kargoda.</p>
       ${M.demoMod ? `<p class="demo-note" style="display:inline-block">Önizleme modu: gerçek bir ödeme alınmadı.</p><br>` : ""}
-      <a class="btn btn-mustard btn-lg" href="index.html" style="margin-top:16px">Alışverişe devam et</a>
+      <a class="btn btn-dark btn-lg" href="index.html" style="margin-top:16px">Alışverişe devam et</a>
     </div>`;
     window.scrollTo({ top: 0, behavior: "smooth" });
   }

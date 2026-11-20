@@ -5,11 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Ürün — Boz Concept Home</title>
   <meta name="description" content="Boz Concept Home ürün detayı.">
-  <meta name="theme-color" content="#f4ecdc">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='48' fill='%23dfa63a'/%3E%3Ctext x='50' y='68' font-size='54' text-anchor='middle' font-family='Georgia' fill='%231d2a2e'%3EB%3C/text%3E%3C/svg%3E">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='48' fill='%23c2512f'/%3E%3Ctext x='50' y='68' font-size='54' text-anchor='middle' font-family='Georgia' fill='%23ffffff'%3EB%3C/text%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,500;0,6..96,600;1,6..96,500&family=Jost:wght@400;500;600&family=Yellowtail&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body class="has-sticky">
@@ -21,8 +21,8 @@
 
     <section class="section" style="padding-top:20px" aria-labelledby="related-title">
       <div class="section-head">
-        <span class="eyebrow both">Bununla iyi gider</span>
-        <h2 id="related-title">Köşeyi <em class="ital">tamamlayın</em></h2>
+        <span class="eyebrow">Bununla iyi gider</span>
+        <h2 id="related-title">Köşeyi tamamlayın.</h2>
       </div>
       <div class="grid" id="related"></div>
     </section>
@@ -52,16 +52,13 @@
 
     const faizsiz = M.taksitler.filter(t => t.oran === 0 && t.ay > 1).map(t => t.ay);
     const enCok = faizsiz.length ? Math.max(...faizsiz) : 0;
-    const videolar = (M.videolar || []).filter(x => x.urun === u.id);
     const renkli = u.varyantlar.some(x => x.renk) && u.varyantlar.length > 1;
     const ilk = u.aciklama.slice(0, 2), kalan = u.aciklama.slice(2);
 
     $("#pdp").innerHTML = `
       <div class="gallery">
-        <div class="gallery-glow" id="glow" aria-hidden="true"></div>
         <div class="pdp-media"><img id="main-img" alt=""><span class="badge" id="badge" hidden></span></div>
         <div class="thumbs" id="thumbs" role="group" aria-label="Ürün fotoğrafları"></div>
-        ${videolar.length ? `<div class="pdp-video"><h3 style="margin-bottom:16px">Videoda izleyin</h3><div class="reels" style="justify-content:start">${videolar.map(B.videoHTML).join("")}</div></div>` : ""}
       </div>
       <div class="pdp-info">
         <span class="eyebrow">${esc(u.kategori)}</span>
@@ -81,7 +78,7 @@
             <button type="button" id="q-plus" aria-label="Artır">+</button>
           </div>
           <button class="btn btn-ghost btn-lg" type="button" id="add">${ikon.bag} Sepete ekle</button>
-          <button class="btn btn-coral btn-lg btn-quick" type="button" id="buy-now">Hemen al ${ikon.lock}</button>
+          <button class="btn btn-primary btn-lg btn-quick" type="button" id="buy-now">Hemen al ${ikon.lock}</button>
         </div>
 
         <ul class="perks">
@@ -121,7 +118,7 @@
       $("#thumbs").innerHTML = v.gorseller.length > 1 ? v.gorseller.map((g, i) =>
         `<button type="button" data-i="${i}" aria-label="Fotoğraf ${i + 1}"><img src="${gorselYol(g, true)}" alt="" loading="lazy"></button>`).join("") : "";
       $("#sticky-buy").innerHTML = `<span class="price">${para(v.fiyat)}</span>
-        <button class="btn btn-coral" type="button" ${v.stok ? `data-add="${u.id}" data-v="${v.barkod}"` : "disabled"}>${v.stok ? "Sepete ekle" : "Tükendi"}</button>`;
+        <button class="btn btn-primary" type="button" ${v.stok ? `data-add="${u.id}" data-v="${v.barkod}"` : "disabled"}>${v.stok ? "Sepete ekle" : "Tükendi"}</button>`;
       foto(0);
     };
     const foto = (i) => {
@@ -129,7 +126,6 @@
       const img = $("#main-img");
       img.src = gorselYol(v.gorseller[gi]);
       img.alt = `${u.ad}${v.renk ? " – " + v.renk : ""}, fotoğraf ${gi + 1}`;
-      $("#glow").style.backgroundImage = `url(${gorselYol(v.gorseller[gi], true)})`;
       $("#thumbs").querySelectorAll("button").forEach((b, j) => b.setAttribute("aria-current", j === gi));
     };
 
@@ -147,7 +143,6 @@
     $("#add").onclick = () => sepeteEkle(u.id, v.barkod, adet);
     $("#buy-now").onclick = () => { if (!v.stok) return; Sepet.ekle(u.id, v.barkod, adet); location.href = "odeme.html"; };
     ciz();
-    B.videolariBagla($("#pdp"));
 
     const benzer = URUNLER.filter(x => x.id !== u.id && stokta(x))
       .sort((a, b) => (b.kategori === u.kategori) - (a.kategori === u.kategori) || (b.koleksiyon === u.koleksiyon) - (a.koleksiyon === u.koleksiyon))

@@ -50,19 +50,6 @@
     return `<svg viewBox="0 0 100 100" aria-hidden="true"><path d="${d}Z" fill="currentColor"/></svg>`;
   };
 
-  /* ---------- Bokeh arka plan ---------- */
-  function bokehCiz() {
-    if (document.querySelector(".bokeh")) return;
-    const renkler = ["#dfa63a", "#d4664a", "#2c6b65", "#efc4b5", "#f0cf86", "#6fa59e"];
-    let tohum = 7;
-    const rnd = () => ((tohum = (tohum * 9301 + 49297) % 233280) / 233280);
-    const toplar = Array.from({ length: 14 }, (_, i) => {
-      const boy = 90 + rnd() * 260;
-      return `<i style="--x:${(rnd() * 100).toFixed(1)}%;--y:${(rnd() * 100).toFixed(1)}%;--s:${boy.toFixed(0)}px;--c:${renkler[i % renkler.length]};--d:${(18 + rnd() * 22).toFixed(1)}s;--o:${(0.22 + rnd() * 0.3).toFixed(2)};--dl:-${(rnd() * 20).toFixed(1)}s"></i>`;
-    }).join("");
-    document.body.insertAdjacentHTML("afterbegin", `<div class="bokeh" aria-hidden="true">${toplar}</div>`);
-  }
-
   /* ---------- Sepet ---------- */
   const ANAHTAR = "boz_sepet_v2";
   const depoOku = () => { try { return JSON.parse(localStorage.getItem(ANAHTAR)) || []; } catch (e) { return []; } };
@@ -97,7 +84,7 @@
   window.addEventListener("storage", (e) => { if (e.key === ANAHTAR) { sepet = depoOku(); dinleyiciler.forEach((f) => f()); } });
 
   /* ---------- Başlık & alt bilgi ---------- */
-  const logo = () => `<a class="logo" href="index.html" aria-label="${esc(M.ad)} ana sayfa"><span class="script">Boz</span><span class="word">Concept Home</span></a>`;
+  const logo = () => `<a class="logo" href="index.html" aria-label="${esc(M.ad)} ana sayfa"><span class="mark">Boz</span><span class="word">Concept Home</span></a>`;
 
   function baslikCiz() {
     const yer = $("#site-header");
@@ -114,7 +101,7 @@
           <nav class="nav" aria-label="Ana menü">
             <a href="index.html#koleksiyon">Koleksiyon</a>
             <a href="index.html#koleksiyon" data-kol-link="Sehpalar">Sehpalar</a>
-            <a href="index.html#videolar">Videolar</a>
+            <a href="index.html#hikaye">Hikâyemiz</a>
             <a href="index.html#sss">Sorular</a>
           </nav>
           <button class="cart-btn" type="button" data-open-cart aria-haspopup="dialog">
@@ -140,7 +127,7 @@
           <div class="cols">
             <div>
               ${logo()}
-              <p style="margin-top:16px;max-width:32ch">Ellilerin zarafeti, bugünün evleri için. Metal tel sehpalar, raflar ve ev düzenleyiciler.</p>
+              <p style="margin-top:16px;max-width:32ch">Metal tel sehpalar, raflar ve ev düzenleyiciler. Az eşya, çok düzen.</p>
               <div class="pay-icons" aria-label="Ödeme yöntemleri"><span>Visa</span><span>Mastercard</span><span>Troy</span><span>Kapıda ödeme</span><span>Havale</span></div>
             </div>
             <div><h4>Koleksiyonlar</h4><ul>${kols}</ul></div>
@@ -214,8 +201,8 @@
     $("#ship-meter").innerHTML = kargoMetre();
     $("#ship-meter").hidden = satirlar.length === 0;
     if (!satirlar.length) {
-      items.innerHTML = `<div class="empty">${yildiz()}<p><b>Sepetiniz henüz boş.</b><br>Koleksiyona göz atın, beğendiğinizi tek dokunuşla ekleyin.</p>
-        <a class="btn btn-mustard" href="index.html#koleksiyon" data-close-cart>Alışverişe başla</a></div>`;
+      items.innerHTML = `<div class="empty">${ikon.bag}<p><b>Sepetiniz henüz boş.</b><br>Koleksiyona göz atın, beğendiğinizi tek dokunuşla ekleyin.</p>
+        <a class="btn btn-dark" href="index.html#koleksiyon" data-close-cart>Alışverişe başla</a></div>`;
       $("#drawer-foot").innerHTML = "";
       return;
     }
@@ -225,7 +212,7 @@
       <div class="row"><span>Ara toplam</span><span>${para(Sepet.araToplam())}</span></div>
       <div class="row"><span>Kargo</span><span>${kargo ? para(kargo) : '<b style="color:var(--teal)">Ücretsiz</b>'}</span></div>
       <div class="row total"><span>Toplam</span><span>${para(Sepet.araToplam() + kargo)}</span></div>
-      <a class="btn btn-coral btn-block btn-lg" href="odeme.html">Güvenle öde ${ikon.lock}</a>
+      <a class="btn btn-primary btn-block btn-lg" href="odeme.html">Güvenle öde ${ikon.lock}</a>
       <p class="note">Kart · Kapıda ödeme · Havale/EFT</p>`;
   }
 
@@ -298,41 +285,6 @@
     </article>`;
   }
 
-  /* ---------- Video kartı ---------- */
-  function videoHTML(vd) {
-    return `<figure class="reel reveal">
-      <video src="${esc(vd.src)}" poster="${esc(vd.poster)}" muted loop playsinline preload="none"></video>
-      <button class="reel-play" type="button" aria-label="${esc(vd.baslik)} videosunu oynat">${ikon.play}</button>
-      <button class="reel-sound" type="button" aria-label="Sesi aç">${ikon.mute}</button>
-      <figcaption><b>${esc(vd.baslik)}</b><span>${esc(vd.sure)}</span></figcaption>
-    </figure>`;
-  }
-  function videolariBagla(kok = document) {
-    kok.querySelectorAll(".reel").forEach((r) => {
-      if (r.dataset.bagli) return;
-      r.dataset.bagli = "1";
-      const v = r.querySelector("video");
-      const oynat = () => { v.play().catch(() => {}); r.classList.add("playing"); };
-      r.querySelector(".reel-play").onclick = () => { if (v.paused) oynat(); else { v.pause(); r.classList.remove("playing"); } };
-      v.onclick = () => { v.pause(); r.classList.remove("playing"); };
-      const ses = r.querySelector(".reel-sound");
-      ses.onclick = () => {
-        v.muted = !v.muted;
-        ses.innerHTML = v.muted ? ikon.mute : ikon.sound;
-        ses.setAttribute("aria-label", v.muted ? "Sesi aç" : "Sesi kapat");
-        if (v.paused) oynat();
-      };
-    });
-    if ("IntersectionObserver" in window && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      const io = new IntersectionObserver((g) => g.forEach((e) => {
-        const r = e.target, v = r.querySelector("video");
-        if (e.isIntersecting && r.dataset.oto !== "0") { v.play().then(() => r.classList.add("playing")).catch(() => {}); }
-        else if (!e.isIntersecting && !v.paused) { v.pause(); r.classList.remove("playing"); }
-      }), { threshold: 0.6 });
-      kok.querySelectorAll(".reel").forEach((r) => io.observe(r));
-    }
-  }
-
   /* ---------- Görünür olunca beliren öğeler ---------- */
   function belirt() {
     const els = document.querySelectorAll(".reveal:not(.in)");
@@ -370,7 +322,6 @@
 
   /* ---------- Başlat ---------- */
   function baslat() {
-    bokehCiz();
     baslikCiz();
     altBilgiCiz();
     if (!document.body.dataset.noCart) cekmeceCiz();
@@ -381,7 +332,7 @@
 
   window.BOZ = {
     M, URUNLER, para, paraKurus, esc, urunBul, varyantBul, anaVaryant, gorselYol, stokta, enDusuk, fiyatlarFarkli, indirimYuzde,
-    kartHTML, videoHTML, videolariBagla, ikon, yildiz, Sepet, sepeteEkle, cekmeceAc, belirt, bildir,
+    kartHTML, ikon, yildiz, Sepet, sepeteEkle, cekmeceAc, belirt, bildir,
   };
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", baslat);
   else baslat();

@@ -34,22 +34,4 @@ window.MAGAZA = {
 
   // Ana sayfanın büyük vitrinindeki ürün (urunler.js içindeki id)
   vitrinUrun: "space-age-metal-yan-sehpa-dergilik-plaklik-pikap-sehpasi-42",
-
-  // Videolar: urun alanı, videonun hangi ürün sayfasında da gösterileceğini belirler.
-  videolar: [
-    {
-      src: "assets/video/tel_sehpa_10s.mp4",
-      poster: "assets/video/tel_sehpa_10s.webp",
-      baslik: "Hem sehpa, hem dergilik",
-      sure: "10 sn",
-      urun: "space-age-metal-yan-sehpa-dergilik-plaklik-pikap-sehpasi-42",
-    },
-    {
-      src: "assets/video/sehpa_satis_hikayesi_58s.mp4",
-      poster: "assets/video/sehpa_satis_hikayesi_58s.webp",
-      baslik: "Bu salonun bir sorunu vardı…",
-      sure: "58 sn",
-      urun: "space-age-metal-yan-sehpa-dergilik-plaklik-pikap-sehpasi-42",
-    },
-  ],
 };

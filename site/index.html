@@ -3,15 +3,15 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Boz Concept Home — Ellilerin zarafeti, bugünün evleri için</title>
+  <title>Boz Concept Home</title>
   <meta name="description" content="Boz Concept Home: metal tel sehpalar, kitaplıklar, banyo ve mutfak düzenleyicileri. Ücretsiz kargo, kapıda ödeme, kolay iade.">
-  <meta name="theme-color" content="#f4ecdc">
+  <meta name="theme-color" content="#ffffff">
   <meta property="og:title" content="Boz Concept Home">
-  <meta property="og:description" content="Ellilerin zarafeti, bugünün evleri için. Metal tel sehpalar ve ev düzenleyiciler.">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='48' fill='%23dfa63a'/%3E%3Ctext x='50' y='68' font-size='54' text-anchor='middle' font-family='Georgia' fill='%231d2a2e'%3EB%3C/text%3E%3C/svg%3E">
+  <meta property="og:description" content="Metal tel sehpalar, raflar ve ev düzenleyiciler.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='48' fill='%23c2512f'/%3E%3Ctext x='50' y='68' font-size='54' text-anchor='middle' font-family='Georgia' fill='%23ffffff'%3EB%3C/text%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,500;0,6..96,600;1,6..96,500&family=Jost:wght@400;500;600&family=Yellowtail&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
@@ -22,24 +22,17 @@
     <!-- HERO -->
     <section class="hero">
       <div class="wrap">
-        <div class="reveal">
-          <span class="eyebrow">Ellilerin ruhu · Tel tel tasarım</span>
-          <h1><span class="script">Bir sehpa,</span> iki iş.</h1>
-          <p class="lead" id="hero-lead"></p>
-          <div class="hero-cta">
-            <button class="btn btn-coral btn-lg" type="button" id="hero-add">Sepete ekle</button>
-            <a class="btn btn-ghost btn-lg" id="hero-link" href="#">Yakından bak</a>
-          </div>
-          <p class="hero-price" style="margin-top:22px"><small id="hero-color">Fiyat</small><span id="hero-price"></span></p>
+        <span class="eyebrow reveal">Kıvrım Tel Sehpa</span>
+        <h1 class="reveal">Bir sehpa.<br>İki iş.</h1>
+        <p class="lead reveal">Üstü sehpa, yanı dergilik. Tel yapısı odayı doldurmaz, ışığı geçirir.</p>
+        <div class="hero-cta reveal">
+          <button class="btn btn-primary btn-lg" type="button" id="hero-add">Sepete ekle</button>
+          <a class="btn btn-ghost btn-lg" id="hero-link" href="#">Daha fazla bilgi</a>
         </div>
-        <div class="hero-art">
-          <div class="glow" id="hero-glow" aria-hidden="true"></div>
-          <a class="arch" id="hero-arch" href="#"><img id="hero-img" alt="" fetchpriority="high"></a>
-          <div class="burst b1" data-burst="16" aria-hidden="true"></div>
-          <div class="burst b2" data-burst="12" aria-hidden="true"></div>
-          <a class="tag" id="hero-tag" href="#videolar"><span><b id="hero-tag-n"></b>renk seçeneği</span></a>
-          <div class="hero-dots" id="hero-dots" role="group" aria-label="Renk"></div>
-        </div>
+        <p class="hero-price" id="hero-price"></p>
+        <a class="stage" id="hero-stage" href="#" aria-label="Ürüne git"><img id="hero-img" alt="" fetchpriority="high"></a>
+        <div class="dots" id="hero-dots" role="group" aria-label="Renk seçin"></div>
+        <div class="dots-label" id="hero-color" aria-live="polite"></div>
       </div>
     </section>
 
@@ -48,28 +41,28 @@
       <div class="wrap"><ul id="trust-list"></ul></div>
     </section>
 
-    <!-- KATEGORİLER -->
-    <section class="section" style="padding-bottom:30px" aria-labelledby="kol-title">
+    <!-- KOLEKSİYONLAR -->
+    <section class="section" aria-labelledby="kol-title">
       <div class="wrap">
-        <div class="section-head reveal" style="margin-bottom:34px">
-          <span class="eyebrow both">Koleksiyonlar</span>
-          <h2 id="kol-title">Evin her <em class="ital">köşesine</em></h2>
+        <div class="section-head reveal">
+          <span class="eyebrow">Koleksiyonlar</span>
+          <h2 id="kol-title">Evin her köşesi için.</h2>
         </div>
         <div class="kol-grid" id="kol-grid"></div>
       </div>
     </section>
 
-    <!-- KOLEKSİYON -->
-    <section class="section" id="koleksiyon" style="padding-top:60px">
+    <!-- ÜRÜNLER -->
+    <section class="section" id="koleksiyon" style="padding-top:20px">
       <div class="wrap">
         <div class="section-head reveal" style="margin-bottom:30px">
-          <span class="eyebrow both">Tüm ürünler</span>
-          <h2>Ellilerden <em class="ital">bugüne</em></h2>
-          <p>Beğendiğinizi <b>+</b> ile tek dokunuşta sepete ekleyin. Renk seçimi ürün sayfasında.</p>
+          <span class="eyebrow">Tüm ürünler</span>
+          <h2>Seçkimize göz atın.</h2>
+          <p>Beğendiğinizi tek dokunuşla sepete ekleyin. Renk seçimi ürün sayfasında.</p>
         </div>
         <div class="filters" role="group" aria-label="Koleksiyon filtresi" id="filters"></div>
         <div class="toolbar">
-          <label class="searchbox"><span class="sr-only">Ürün ara</span><span id="search-ic"></span><input type="search" id="q" placeholder="Ürün ara: sehpa, kitaplık, havlupan…" autocomplete="off"></label>
+          <label class="searchbox"><span class="sr-only">Ürün ara</span><span id="search-ic"></span><input type="search" id="q" placeholder="Ürün ara" autocomplete="off"></label>
           <span class="result-count" id="count" aria-live="polite"></span>
           <label class="sortbox"><span class="sr-only">Sırala</span>
             <select id="sort">
@@ -85,46 +78,30 @@
       </div>
     </section>
 
-    <!-- VİDEOLAR -->
-    <section class="section section-paper" id="videolar">
-      <div class="wrap">
-        <div class="section-head reveal">
-          <span class="eyebrow both">Videolar</span>
-          <h2>Evde <em class="ital">nasıl</em> duruyor?</h2>
-          <p>Kısa videolarla ürünü yakından görün. Ses için sağ üstteki düğmeye dokunun.</p>
-        </div>
-        <div class="reels" id="reels"></div>
-        <div class="more"><a class="btn btn-mustard" id="video-cta" href="#">Videodaki sehpayı incele</a></div>
-      </div>
-    </section>
-
     <!-- HİKÂYE -->
-    <section class="section story" id="hikaye">
+    <section class="story" id="hikaye">
       <div class="wrap">
-        <div class="story-art reveal" aria-hidden="true">
-          <div class="frame"><img id="story-img" alt="" loading="lazy"></div>
-          <div class="burst" data-burst="14"></div>
-        </div>
+        <div class="story-art reveal" aria-hidden="true"><img id="story-img" alt="" loading="lazy"></div>
         <div class="reveal">
           <span class="eyebrow">Hikâyemiz</span>
-          <h2>Ellilerin <span class="script">zarafeti</span>, bugünün evleri için.</h2>
-          <p>1950'ler evlere hafiflik getirdi: ince hatlar, kavisli teller, neşeli renkler. Biz de bu ruhu bugünün küçük ve yoğun evlerine taşıyoruz. Her parça hem güzel görünsün hem bir iş görsün istiyoruz.</p>
+          <h2>Az eşya.<br>Çok düzen.</h2>
+          <p>Evlerimiz küçüldü, eşyalarımız çoğaldı. Biz de hem güzel görünen hem bir iş gören parçalar tasarlıyoruz: sehpa olan dergilik, raf olan banyo düzenleyici.</p>
           <ol class="steps">
-            <li><div><b>Seçin.</b> Ürünü ve rengini seçip sepete ekleyin; sepetiniz siz ayrılsanız da saklanır.</div></li>
+            <li><div><b>Seçin.</b> Ürünü ve rengini seçip sepete ekleyin. Sepetiniz siz ayrılsanız da saklanır.</div></li>
             <li><div><b>Tek sayfada ödeyin.</b> Kart, kapıda ödeme ya da havale. Üyelik gerekmez.</div></li>
             <li><div><b>Kapınıza gelsin.</b> <span id="ship-time"></span> içinde kargoda. Beğenmezseniz <span id="return-days"></span> gün içinde iade edin.</div></li>
           </ol>
-          <a class="btn btn-mustard" href="#koleksiyon" style="margin-top:30px">Koleksiyonu gör</a>
+          <a class="btn" href="#koleksiyon">Koleksiyonu gör</a>
         </div>
       </div>
     </section>
 
     <!-- SSS -->
-    <section class="section section-paper" id="sss">
+    <section class="section" id="sss">
       <div class="wrap">
         <div class="section-head reveal">
-          <span class="eyebrow both">Sık sorulanlar</span>
-          <h2>Aklınızda soru kalmasın</h2>
+          <span class="eyebrow">Sık sorulanlar</span>
+          <h2>Aklınızda soru kalmasın.</h2>
         </div>
         <div class="faq reveal" id="faq"></div>
       </div>
@@ -132,12 +109,10 @@
 
     <!-- CTA -->
     <section class="cta-band">
-      <div class="burst l" data-burst="18"></div>
-      <div class="burst r" data-burst="14"></div>
       <div class="wrap">
-        <h2>Okuma köşenizi kurun</h2>
-        <p>Dergiler yerde kalmasın: tel sehpalar ve dergiliklerle salonunuza ellilerin hafifliğini katın.</p>
-        <a class="btn btn-mustard btn-lg" href="index.html?k=Sehpalar#koleksiyon" data-kol="Sehpalar">Sehpaları gör</a>
+        <h2>Okuma köşenizi kurun.</h2>
+        <p>Dergiler yerde kalmasın. Tel sehpalarla salonunuza hafiflik katın.</p>
+        <a class="btn btn-primary btn-lg" href="index.html?k=Sehpalar#koleksiyon" data-kol="Sehpalar">Sehpaları gör</a>
       </div>
     </section>
   </main>
@@ -152,27 +127,23 @@
     const B = window.BOZ;
     const { M, URUNLER, para, esc, kartHTML, ikon, urunBul, gorselYol, stokta, enDusuk, anaVaryant, belirt } = B;
     const $ = (s) => document.querySelector(s);
+    const kolBuyuk = (v) => gorselYol(v.gorseller[0]);
 
-    /* ---- Hero: vitrin ürünün renkleri döner ---- */
+    /* ---- Hero: vitrin ürünün renkleri sırayla döner ---- */
     const vit = urunBul(M.vitrinUrun) || URUNLER.find(stokta);
     const vits = vit.varyantlar.filter(v => v.stok);
     let hi = 0, heroZaman;
-    const linkV = (v) => `urun.html?id=${vit.id}&v=${v.barkod}`;
-    $("#hero-lead").textContent = "Tel yan sehpa: üstünde kahveniz, yanında dergileriniz ve plaklarınız. Teller arasından ışık geçer, oda ferah kalır.";
-    $("#hero-tag-n").textContent = vits.length;
-    $("#hero-dots").innerHTML = vits.map((v, i) => `<button type="button" aria-label="${esc(v.renk)}" style="${i ? "" : ""}"></button>`).join("");
+    $("#hero-dots").innerHTML = vits.map(v => `<button type="button" aria-label="${esc(v.renk)}" style="background:${v.hex}"></button>`).join("");
     const heroGoster = (i) => {
       hi = (i + vits.length) % vits.length;
-      const v = vits[hi];
-      const img = $("#hero-img");
+      const v = vits[hi], img = $("#hero-img");
       img.style.opacity = 0;
       const yeni = new Image();
       yeni.onload = () => { img.src = yeni.src; img.alt = `${vit.ad} – ${v.renk}`; img.style.opacity = 1; };
-      yeni.src = gorselYol(v.gorseller[0]);
-      $("#hero-glow").style.backgroundImage = `url(${gorselYol(v.gorseller[0], true)})`;
-      $("#hero-price").textContent = para(v.fiyat);
-      $("#hero-color").textContent = v.renk ? `Renk: ${v.renk}` : "Fiyat";
-      $("#hero-link").href = $("#hero-arch").href = linkV(v);
+      yeni.src = kolBuyuk(v);
+      $("#hero-price").innerHTML = `<b>${para(v.fiyat)}</b>${v.renk ? ` · ${esc(v.renk)}` : ""}`;
+      $("#hero-color").textContent = vits.length > 1 ? `${vits.length} renk seçeneği` : "";
+      $("#hero-link").href = $("#hero-stage").href = `urun.html?id=${vit.id}&v=${v.barkod}`;
       $("#hero-add").dataset.add = vit.id; $("#hero-add").dataset.v = v.barkod;
       $("#hero-dots").querySelectorAll("button").forEach((b, j) => b.setAttribute("aria-current", j === hi));
     };
@@ -182,7 +153,7 @@
       heroGoster([...b.parentNode.children].indexOf(b));
     });
     heroGoster(0);
-    if (vits.length > 1 && !matchMedia("(prefers-reduced-motion: reduce)").matches) heroZaman = setInterval(() => heroGoster(hi + 1), 4200);
+    if (vits.length > 1 && !matchMedia("(prefers-reduced-motion: reduce)").matches) heroZaman = setInterval(() => heroGoster(hi + 1), 4500);
 
     $("#ship-time").textContent = M.kargoSuresi;
     $("#return-days").textContent = M.iadeGunu;
@@ -198,12 +169,12 @@
     $("#trust-list").innerHTML = guven.map(([i, b, s]) =>
       `<li class="reveal"><span class="ic">${i}</span><span><b>${b}</b><small>${s}</small></span></li>`).join("");
 
-    /* ---- Kategori daireleri ---- */
+    /* ---- Koleksiyon kutuları ---- */
     const KOLS = window.KOLEKSIYONLAR.filter(k => URUNLER.some(u => u.koleksiyon === k));
     $("#kol-grid").innerHTML = KOLS.map(k => {
       const ilk = URUNLER.find(u => u.koleksiyon === k && stokta(u)) || URUNLER.find(u => u.koleksiyon === k);
       const n = URUNLER.filter(u => u.koleksiyon === k).length;
-      return `<button class="kol reveal" type="button" data-kol="${esc(k)}"><span class="ph"><img src="${gorselYol(anaVaryant(ilk).gorseller[0], true)}" alt="" loading="lazy"></span><span><b>${esc(k)}</b><small>${n} ürün</small></span></button>`;
+      return `<button class="kol reveal" type="button" data-kol="${esc(k)}"><img src="${gorselYol(anaVaryant(ilk).gorseller[0], true)}" alt="" loading="lazy"><span class="t"><b>${esc(k)}</b><small>${n} ürün</small></span></button>`;
     }).join("");
 
     /* ---- Katalog: filtre + arama + sıralama + sayfalama ---- */
@@ -234,7 +205,7 @@
     };
     const kolSec = (k, kaydir) => {
       durum.kol = k; durum.sayfa = 1; listele();
-      const u = new URL(location); k === "Tümü" ? u.searchParams.delete("k") : u.searchParams.set("k", k); history.replaceState(null, "", u);
+      try { const u = new URL(location); k === "Tümü" ? u.searchParams.delete("k") : u.searchParams.set("k", k); history.replaceState(null, "", u); } catch (e) {}
       if (kaydir) document.getElementById("koleksiyon").scrollIntoView({ behavior: "smooth" });
     };
     $("#filters").addEventListener("click", (e) => { const b = e.target.closest(".chip"); if (b) kolSec(b.dataset.k); });
@@ -246,11 +217,6 @@
     $("#sort").addEventListener("change", (e) => { durum.sort = e.target.value; durum.sayfa = 1; listele(); });
     $("#more").addEventListener("click", () => { durum.sayfa++; listele(); });
     listele();
-
-    /* ---- Videolar ---- */
-    $("#reels").innerHTML = (M.videolar || []).map(B.videoHTML).join("");
-    B.videolariBagla($("#reels"));
-    $("#video-cta").href = `urun.html?id=${(M.videolar[0] || {}).urun || vit.id}`;
 
     /* ---- Hikâye görseli ---- */
     const hik = vit.varyantlar.find(v => v.gorseller.length > 2) || vit.varyantlar[0];
