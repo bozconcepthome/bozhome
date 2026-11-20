@@ -248,7 +248,8 @@ section { scroll-margin-top: 70px; }
 .empty svg { width: 54px; margin: 0 auto 18px; color: var(--line); }
 
 .toast { position: fixed; left: 50%; bottom: 24px; z-index: 100; transform: translate(-50%, 160%); background: rgba(29,29,31,.94); color: #fff; padding: 12px 14px 12px 20px; border-radius: 999px; display: flex; align-items: center; gap: 14px; box-shadow: 0 14px 30px -10px rgba(0,0,0,.5); transition: transform .35s cubic-bezier(.2,.8,.2,1); font-size: .92rem; max-width: calc(100% - 32px); }
-.toast.show { transform: translate(-50%, 0); }
+.toast.show { transform: translate(-50%, 0); visibility: visible; transition: transform .35s cubic-bezier(.2,.8,.2,1), visibility 0s; }
+.toast:not(.show) { visibility: hidden; transition: transform .35s cubic-bezier(.2,.8,.2,1), visibility 0s .35s; }
 .toast button { background: #fff; color: var(--ink); border: 0; border-radius: 999px; padding: 7px 14px; font-weight: 500; cursor: pointer; white-space: nowrap; }
 
 /* ---------- Product page ---------- */
@@ -312,6 +313,9 @@ section { scroll-margin-top: 70px; }
 .v3d-hint { position: absolute; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); left: 50%; transform: translateX(-50%); margin: 0; color: var(--mute); font-size: .85rem; text-align: center; width: calc(100% - 32px); }
 .viewer3d .lb-btn { background: rgba(0,0,0,.08); color: var(--ink); }
 .viewer3d .lb-btn:hover { background: rgba(0,0,0,.14); }
+
+.taslak-serit { position: fixed; z-index: 110; left: 50%; transform: translateX(-50%); top: calc(8px + env(safe-area-inset-top, 0px)); background: #1d1d1f; color: #fff; font-size: .82rem; padding: 8px 14px; border-radius: 999px; display: flex; gap: 12px; align-items: center; box-shadow: 0 10px 30px -12px rgba(0,0,0,.5); white-space: nowrap; }
+.taslak-serit a { color: #ffb59c; }
 
 /* ---------- Checkout ---------- */
 .checkout-head { border-bottom: 1px solid var(--line); background: rgba(255,255,255,.9); }

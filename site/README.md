@@ -7,6 +7,7 @@ Sade ve ferah, ürün odaklı (beyaz/açık gri yüzeyler, büyük başlıklar, 
 | `index.html` | Vitrin (renk değiştiren açılış), koleksiyon kutuları, arama + filtre + sıralama ile tüm ürünler, hikâye, SSS |
 | `urun.html?id=…` | Fotoğraf galerisi (kaydırmalı, tam ekran görüntüleyici), renk seçimi, taksit bilgisi, "Hemen al", 3D model (varsa), benzer ürünler |
 | `odeme.html` | Tek sayfa ödeme: iletişim → adres → ödeme (kart + taksit / kapıda / havale), anlık doğrulama, sipariş onayı |
+| `yonetim.html` | Yönetim paneli: genel bakış, ürünler (fiyat, stok, gizle, öne çıkar, açıklama), mağaza ayarları, deneme siparişleri, yayınla |
 
 ## Bilgisayarda açmak
 
@@ -52,6 +53,20 @@ Henüz Trendyol'a girilmemiş ürünler `assets/js/ek_urunler.js` dosyasındadı
 - Ölçüler (51 × 43 × 45 cm) modelin milimetre olduğu varsayılarak hesaplandı; üretim ölçüsüyle karşılaştırın.
 - Ürün adı ("S Tel Yan Sehpa") geçicidir.
 - Sahne betikleri: `tools/sahne/` (`sahne.py`, `glb.py`). Örnek: `blender -b -P tools/sahne/sahne.py -- <klasör> salon 1200 1800 400` (klasörde `model.obj` bulunmalı).
+
+## Yönetim paneli (`yonetim.html`)
+
+Sitenin sunucusu/veritabanı olmadığı için panel şöyle çalışır:
+
+1. Panelde yaptığınız her değişiklik önce **taslak** olarak tarayıcınızda saklanır (canlı siteyi etkilemez).
+2. **Sitede önizle** taslağı yalnız sizin tarayıcınızda sitede gösterir (üstte “Taslak önizleme” şeridi çıkar).
+3. **Yayınla** sekmesindeki **Yayın dosyasını indir** ile `yonetim.js` dosyası üretilir; sunucudaki `site/assets/js/yonetim.js` yerine konunca değişiklikler herkes için yayına girer.
+
+Panelde yapılanlar Excel verisini değiştirmez, üstüne uygulanır: Excel'den yeniden içe aktarma yapsanız da fiyat/stok/gizleme düzeltmeleriniz korunur.
+
+**Güvenlik:** Panel sayfası değişiklikleri doğrudan canlıya yazamaz (yalnız dosya üretir); yine de `yonetim.html` adresini paylaşmayın ve barındırma tarafında şifreyle koruyun (Netlify/Vercel/Cloudflare'de “password protection / basic auth”). Sayfa arama motorlarına kapalıdır (`noindex`).
+
+**Siparişler:** Ödeme altyapısı bağlanana kadar gerçek siparişler bir yere kaydedilmez; panelde yalnız aynı tarayıcıda verilen deneme siparişleri görünür.
 
 ## Ayarlar — `assets/js/data.js`
 

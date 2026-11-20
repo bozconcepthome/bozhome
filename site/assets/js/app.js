@@ -4,7 +4,27 @@
 (function () {
   "use strict";
   const M = window.MAGAZA;
-  const URUNLER = [...(window.EK_URUNLER || []), ...(window.URUNLER || [])];
+  /* ---------- Yönetim paneli değişikliklerini uygula ---------- */
+  // Yayındaki değişiklikler: assets/js/yonetim.js. Taslak önizleme (?taslak=1): yalnız panelin açıldığı tarayıcıda.
+  let taslakModu = false, Y = window.YONETIM || {};
+  try {
+    const q = new URLSearchParams(location.search).get("taslak");
+    if (q === "1") sessionStorage.setItem("boz_taslak_onizleme", "1");
+    if (q === "0") sessionStorage.removeItem("boz_taslak_onizleme");
+    taslakModu = sessionStorage.getItem("boz_taslak_onizleme") === "1";
+    if (taslakModu) { const t = JSON.parse(localStorage.getItem("boz_yonetim_taslak")); if (t) Y = t; }
+  } catch (e) {}
+  Object.entries(Y.ayarlar || {}).forEach(([k, v]) => { M[k] = v; });
+  const uygula = (u0) => {
+    const o = (Y.urunler || {})[u0.id];
+    if (!o) return u0;
+    const u = JSON.parse(JSON.stringify(u0));
+    ["ad", "gizli", "oneCikan", "yakinda", "aciklama", "olcu"].forEach((k) => { if (o[k] !== undefined) u[k] = o[k]; });
+    u.varyantlar.forEach((v) => { Object.assign(v, (o.v || {})[v.barkod] || {}); });
+    return u;
+  };
+  const URUNLER = [...(window.EK_URUNLER || []), ...(window.URUNLER || [])].map(uygula).filter((u) => !u.gizli)
+    .map((u, i) => [u, i]).sort((a, b) => (!!b[0].oneCikan - !!a[0].oneCikan) || a[1] - b[1]).map(([u]) => u);
   window.URUNLER = URUNLER;
 
   /* ---------- Yardımcılar ---------- */
@@ -330,6 +350,7 @@
     if (!document.body.dataset.noCart) cekmeceCiz();
     Sepet.dinle(cekmeceGuncelle);
     cekmeceGuncelle();
+    if (taslakModu) document.body.insertAdjacentHTML("beforeend", `<div class="taslak-serit" role="status">Taslak önizleme · yayında değil <a href="?taslak=0">Çık</a> <a href="yonetim.html">Panele dön</a></div>`);
     document.querySelectorAll("[data-burst]").forEach((el) => { el.innerHTML = yildiz(Number(el.dataset.burst) || 16); });
   }
 

@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Boz Yönetim</title>
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#f5f5f7">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%231d1d1f'/%3E%3Ctext x='50' y='68' font-size='54' text-anchor='middle' font-family='Georgia' fill='%23ffffff'%3EB%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="stylesheet" href="assets/css/panel.css">
+</head>
+<body class="panel-body">
+  <div class="panel-app">
+    <aside class="side">
+      <a class="logo" href="index.html" title="Siteyi aç"><span class="mark">Boz</span><span class="word">Yönetim</span></a>
+      <nav class="side-nav" id="side-nav" aria-label="Panel bölümleri">
+        <button type="button" data-sekme="genel" aria-current="page"><span class="i">◎</span>Genel bakış</button>
+        <button type="button" data-sekme="urunler"><span class="i">▦</span>Ürünler</button>
+        <button type="button" data-sekme="ayarlar"><span class="i">⚙</span>Mağaza ayarları</button>
+        <button type="button" data-sekme="siparisler"><span class="i">☰</span>Siparişler</button>
+        <button type="button" data-sekme="yayinla"><span class="i">↑</span>Yayınla <span class="pill" id="nav-degisiklik" hidden></span></button>
+      </nav>
+      <p class="side-note">Değişiklikler önce taslak olarak bu tarayıcıda tutulur. <b>Yayınla</b> adımıyla siteye aktarılır.</p>
+    </aside>
+
+    <div class="main">
+      <header class="topbar">
+        <div>
+          <h1 id="baslik">Genel bakış</h1>
+          <p class="sub" id="durum"></p>
+        </div>
+        <div class="top-actions">
+          <a class="btn btn-ghost" id="onizle" href="index.html?taslak=1" target="_blank" rel="noopener">Sitede önizle</a>
+          <button class="btn btn-primary" type="button" data-git="yayinla">Yayınla</button>
+        </div>
+      </header>
+      <main id="icerik" class="content"></main>
+    </div>
+  </div>
+
+  <aside class="edit" id="edit" role="dialog" aria-modal="true" aria-labelledby="edit-baslik" hidden>
+    <div class="edit-head">
+      <h2 id="edit-baslik">Ürünü düzenle</h2>
+      <button class="icon-btn" type="button" id="edit-kapat" aria-label="Kapat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+    </div>
+    <div class="edit-body" id="edit-body"></div>
+  </aside>
+  <div class="overlay" id="edit-perde"></div>
+  <div class="toast" role="status" aria-live="polite"><span id="toast-msg"></span></div>
+
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/ek_urunler.js"></script>
+  <script src="assets/js/urunler.js"></script>
+  <script src="assets/js/yonetim.js"></script>
+  <script src="assets/js/panel.js"></script>
+</body>
+</html>
