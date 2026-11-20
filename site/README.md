@@ -1,11 +1,11 @@
 # Boz Concept Home — e-ticaret sitesi
 
-1950'lerin ruhunu taşıyan (Bodoni & el yazısı başlıklar, hardal/mercan/petrol renkleri, atom yıldızları, kemerli çerçeveler), bokeh ışıklı ve buzlu cam panelli, kurulum gerektirmeyen statik bir mağaza.
+Sade ve ferah, ürün odaklı (beyaz/açık gri yüzeyler, büyük başlıklar, buzlu cam menü, Boz terakota vurgu rengi), kurulum gerektirmeyen statik bir mağaza.
 
 | Sayfa | Ne yapar |
 |---|---|
-| `index.html` | Vitrin (renk değiştiren açılış), koleksiyon daireleri, arama + filtre + sıralama ile tüm ürünler, videolar, SSS |
-| `urun.html?id=…` | Fotoğraf galerisi (mobilde kaydırmalı), renk seçimi, taksit bilgisi, "Hemen al", ürün videosu, benzer ürünler |
+| `index.html` | Vitrin (renk değiştiren açılış), koleksiyon kutuları, arama + filtre + sıralama ile tüm ürünler, hikâye, SSS |
+| `urun.html?id=…` | Fotoğraf galerisi (kaydırmalı, tam ekran görüntüleyici), renk seçimi, taksit bilgisi, "Hemen al", 3D model (varsa), benzer ürünler |
 | `odeme.html` | Tek sayfa ödeme: iletişim → adres → ödeme (kart + taksit / kapıda / havale), anlık doğrulama, sipariş onayı |
 
 ## Bilgisayarda açmak
@@ -29,16 +29,33 @@ python3 site/tools/excel_to_site.py ~/Downloads/urunleriniz.xlsx
 Betik:
 - Aynı **Model Kodu**'ndaki satırları tek ürünün renk seçenekleri yapar.
 - Arşivlenmiş, çoklanan ve fiyatı girilmemiş ürünleri atlar; stoğu olmayanları **Tükendi** olarak gösterir.
-- Görselleri indirir, WebP'ye çevirir (`assets/urun/`), kullanılmayanları siler.
+- Görselleri Trendyol'daki orijinal çözünürlükte (1200×1800) indirir, WebP'ye çevirir (`assets/urun/`), kullanılmayanları siler.
 - `assets/js/urunler.js` dosyasını yeniden yazar. Bu dosyayı elle düzenlemeyin.
 
 Trendyol kategorilerinin sitedeki koleksiyonlara (Sehpalar, Raf & Kitaplık, Banyo…) nasıl dağıldığı betiğin başındaki `KOLEKSIYON` tablosundadır. Yeni bir renk adı gelirse `RENK` tablosuna rengini ekleyin.
 
 > Excel dosyası (komisyon oranı, partner ID içerir) depoya eklenmez; `.gitignore`'dadır.
 
+## Excel'de olmayan yeni ürün eklemek
+
+Henüz Trendyol'a girilmemiş ürünler `assets/js/ek_urunler.js` dosyasındadır; Excel dönüştürücüsü bu dosyaya dokunmaz.
+
+- `yakinda: true` olan ürün "Yeni · Yakında" rozetiyle listelenir, fiyat yerine "Fiyat yakında" yazar ve sepete eklenemez.
+- Fiyat belli olunca `yakinda: false` yapın, varyantın `fiyat` ve `stok: true` alanlarını doldurun.
+- Ürün Excel'e eklendiğinde buradan silin (aksi hâlde iki kez görünür).
+
+### S Tel Yan Sehpa (3D modelden sahnelendi)
+
+`MODEL.obj` dosyasından Blender (Cycles) ile 5 görsel üretildi: iki salon çekimi, bir yakın çekim, iki stüdyo çekimi (1200×1800). Ürün sayfasındaki **3D olarak incele** düğmesi `assets/3d/s-tel-yan-sehpa.glb` modelini döndürülebilir olarak açar (model-viewer, ilk tıklamada yüklenir).
+
+- Model dosyasında malzeme (MTL) olmadığı için renk **mat siyah toz boya** olarak seçildi. Başka renkler istenirse aynı sahne betiğiyle render alınabilir.
+- Ölçüler (51 × 43 × 45 cm) modelin milimetre olduğu varsayılarak hesaplandı; üretim ölçüsüyle karşılaştırın.
+- Ürün adı ("S Tel Yan Sehpa") geçicidir.
+- Sahne betikleri: `tools/sahne/` (`sahne.py`, `glb.py`). Örnek: `blender -b -P tools/sahne/sahne.py -- <klasör> salon 1200 1800 400` (klasörde `model.obj` bulunmalı).
+
 ## Ayarlar — `assets/js/data.js`
 
-Kargo limiti ve ücreti, kapıda ödeme bedeli, taksit oranları, IBAN, iletişim bilgileri, vitrin ürünü ve videolar buradadır. `TODO` yazan alanları doldurun (telefon, e-posta, Instagram, IBAN).
+Kargo limiti ve ücreti, kapıda ödeme bedeli, taksit oranları, IBAN, iletişim bilgileri, ve vitrin ürünü buradadır. `TODO` yazan alanları doldurun (telefon, e-posta, Instagram, IBAN).
 
 ## Canlıya almadan önce yapılacaklar
 

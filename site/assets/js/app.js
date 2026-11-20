@@ -4,7 +4,8 @@
 (function () {
   "use strict";
   const M = window.MAGAZA;
-  const URUNLER = window.URUNLER || [];
+  const URUNLER = [...(window.EK_URUNLER || []), ...(window.URUNLER || [])];
+  window.URUNLER = URUNLER;
 
   /* ---------- Yardımcılar ---------- */
   const tl = new Intl.NumberFormat("tr-TR", { style: "currency", currency: "TRY", maximumFractionDigits: 0 });
@@ -252,6 +253,7 @@
     const u = urunBul(id);
     const v = varyantBul(u, barkod);
     if (!u || !v) return;
+    if (u.yakinda) { bildir("Bu ürün çok yakında satışta"); return; }
     if (!v.stok) { bildir("Bu renk şu an tükendi"); return; }
     Sepet.ekle(id, v.barkod, adet);
     bildir(`${u.ad}${v.renk ? ` (${v.renk})` : ""} sepete eklendi`);
@@ -263,11 +265,12 @@
     const var_ = stokta(u);
     const ind = indirimYuzde(v);
     const ikinci = v.gorseller[1];
-    const rozet = !var_ ? `<span class="badge out">Tükendi</span>`
+    const rozet = u.yakinda ? `<span class="badge sale">Yeni · Yakında</span>`
+      : !var_ ? `<span class="badge out">Tükendi</span>`
       : ind >= 5 ? `<span class="badge sale">%${ind} indirim</span>`
       : u.varyantlar.length > 2 ? `<span class="badge">${u.varyantlar.length} renk</span>` : "";
     const renkler = u.varyantlar.filter((x) => x.hex).slice(0, 6);
-    return `<article class="card reveal${var_ ? "" : " is-out"}">
+    return `<article class="card reveal${var_ || u.yakinda ? "" : " is-out"}">
       ${rozet}
       <a class="card-media" href="urun.html?id=${u.id}" aria-label="${esc(u.ad)} detayları">
         <img src="${gorselYol(v.gorseller[0], true)}" alt="${esc(u.ad)}" loading="lazy" decoding="async">
@@ -278,7 +281,7 @@
         <h3><a href="urun.html?id=${u.id}" title="${esc(u.tamAd)}">${esc(u.ad)}</a></h3>
         ${renkler.length > 1 ? `<div class="swatches sm" aria-label="Renkler">${renkler.map((x) => `<span style="background:${x.hex}" title="${esc(x.renk)}"></span>`).join("")}</div>` : ""}
         <div class="card-foot">
-          <span class="price">${fiyatlarFarkli(u) ? "<small>başlayan</small>" : ""}${para(enDusuk(u))}${ind >= 5 ? `<s>${para(v.piyasa)}</s>` : ""}</span>
+          <span class="price">${u.yakinda ? `<small>Fiyat</small>yakında` : `${fiyatlarFarkli(u) ? "<small>başlayan</small>" : ""}${para(enDusuk(u))}${ind >= 5 ? `<s>${para(v.piyasa)}</s>` : ""}`}</span>
           ${var_ ? `<button class="add-btn" type="button" data-add="${u.id}" data-v="${v.barkod}" aria-label="${esc(u.ad)} sepete ekle">${ikon.plus}</button>` : ""}
         </div>
       </div>

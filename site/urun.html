@@ -32,6 +32,7 @@
   <div id="site-footer"></div>
 
   <script src="assets/js/data.js"></script>
+  <script src="assets/js/ek_urunler.js"></script>
   <script src="assets/js/urunler.js"></script>
   <script src="assets/js/app.js"></script>
   <script>
@@ -59,6 +60,7 @@
       <div class="gallery">
         <div class="pdp-media" id="media" role="button" tabindex="0" aria-label="Fotoğrafı tam ekran aç"><img id="main-img" alt=""><span class="badge" id="badge" hidden></span><span class="zoom-hint" id="zoom-hint"></span></div>
         <div class="thumbs" id="thumbs" role="group" aria-label="Ürün fotoğrafları"></div>
+        ${u.model3d ? `<button class="btn btn-ghost btn-block" type="button" id="ac-3d" style="margin-top:12px">3D olarak incele</button>` : ""}
       </div>
       <div class="pdp-info">
         <span class="eyebrow">${esc(u.kategori)}</span>
@@ -103,22 +105,22 @@
 
     const ciz = () => {
       const ind = indirimYuzde(v);
-      $("#price").innerHTML = `${para(v.fiyat)}${ind >= 5 ? `<s>${para(v.piyasa)}</s>` : ""}`;
-      $("#inst").textContent = enCok ? `Peşin fiyatına ${enCok} taksit: ayda ${paraKurus(v.fiyat / enCok)}` : "Taksit seçenekleri ödeme adımında";
+      $("#price").innerHTML = u.yakinda ? "Fiyat yakında" : `${para(v.fiyat)}${ind >= 5 ? `<s>${para(v.piyasa)}</s>` : ""}`;
+      $("#inst").textContent = u.yakinda ? "Yeni ürün. Çok yakında satışta." : enCok ? `Peşin fiyatına ${enCok} taksit: ayda ${paraKurus(v.fiyat / enCok)}` : "Taksit seçenekleri ödeme adımında";
       $("#perk-ship").innerHTML = `<b>${M.kargoSuresi}</b> içinde kargoda · ${v.fiyat >= M.ucretsizKargoLimiti ? "<b>Ücretsiz kargo</b>" : `${para(M.ucretsizKargoLimiti)} üzeri ücretsiz`}`;
-      $("#sku").textContent = v.sku || v.barkod;
+      $("#sku").textContent = v.sku || (u.yakinda ? "—" : v.barkod);
       const badge = $("#badge");
-      badge.hidden = !(ind >= 5 || !v.stok);
-      badge.className = "badge " + (v.stok ? "sale" : "out");
-      badge.textContent = v.stok ? `%${ind} indirim` : "Bu renk tükendi";
+      badge.hidden = !(ind >= 5 || !v.stok || u.yakinda);
+      badge.className = "badge " + (v.stok || u.yakinda ? "sale" : "out");
+      badge.textContent = u.yakinda ? "Yeni · Yakında" : v.stok ? `%${ind} indirim` : "Bu renk tükendi";
       if ($("#renk-ad")) $("#renk-ad").textContent = v.renk + (v.stok ? "" : " (tükendi)");
       document.querySelectorAll(".swatch").forEach(s => s.setAttribute("aria-checked", s.dataset.b === v.barkod));
       ["#add", "#buy-now"].forEach(s => { $(s).disabled = !v.stok; });
-      $("#buy-now").innerHTML = v.stok ? `Hemen al ${ikon.lock}` : "Tükendi";
+      $("#buy-now").innerHTML = u.yakinda ? "Çok yakında" : v.stok ? `Hemen al ${ikon.lock}` : "Tükendi";
       $("#thumbs").innerHTML = v.gorseller.length > 1 ? v.gorseller.map((g, i) =>
         `<button type="button" data-i="${i}" aria-label="Fotoğraf ${i + 1}"><img src="${gorselYol(g, true)}" alt="" loading="lazy"></button>`).join("") : "";
-      $("#sticky-buy").innerHTML = `<span class="price">${para(v.fiyat)}</span>
-        <button class="btn btn-primary" type="button" ${v.stok ? `data-add="${u.id}" data-v="${v.barkod}"` : "disabled"}>${v.stok ? "Sepete ekle" : "Tükendi"}</button>`;
+      $("#sticky-buy").innerHTML = `<span class="price">${u.yakinda ? "Yakında" : para(v.fiyat)}</span>
+        <button class="btn btn-primary" type="button" ${v.stok ? `data-add="${u.id}" data-v="${v.barkod}"` : "disabled"}>${u.yakinda ? "Çok yakında" : v.stok ? "Sepete ekle" : "Tükendi"}</button>`;
       foto(0);
     };
     const foto = (i) => {
@@ -171,6 +173,32 @@
       v = varyantBul(u, s.dataset.b); ciz();
       const url = new URL(location); url.searchParams.set("v", v.barkod); history.replaceState(null, "", url);
     }));
+    /* ---- 3D görüntüleyici (model-viewer, tıklanınca yüklenir) ---- */
+    if (u.model3d) {
+      document.body.insertAdjacentHTML("beforeend", `<div class="lightbox viewer3d" id="v3d" hidden role="dialog" aria-modal="true" aria-label="3D ürün görüntüleyici">
+        <div class="v3d-stage" id="v3d-stage"><p class="v3d-load">3D model yükleniyor…</p></div>
+        <p class="v3d-hint">Döndürmek için sürükleyin, yakınlaştırmak için iki parmakla açın.</p>
+        <button class="lb-btn lb-close" type="button" id="v3d-close" aria-label="Kapat">×</button></div>`);
+      let yuklendi = false;
+      $("#ac-3d").onclick = () => {
+        $("#v3d").hidden = false; document.body.style.overflow = "hidden";
+        if (!yuklendi) {
+          yuklendi = true;
+          const sc = document.createElement("script");
+          sc.type = "module"; sc.src = "https://unpkg.com/@google/model-viewer@3.5.0/dist/model-viewer.min.js";
+          sc.onerror = () => { $("#v3d-stage").innerHTML = '<p class="v3d-load">3D görüntüleyici yüklenemedi. İnternet bağlantınızı kontrol edin.</p>'; };
+          document.head.appendChild(sc);
+          $("#v3d-stage").innerHTML = `<model-viewer src="${esc(u.model3d)}" alt="${esc(u.ad)} 3D modeli" camera-controls touch-action="pan-y"
+            auto-rotate auto-rotate-delay="800" rotation-per-second="18deg" shadow-intensity="1" shadow-softness="0.8" exposure="1.05"
+            environment-image="neutral" camera-orbit="-35deg 70deg auto" interaction-prompt="none"></model-viewer>`;
+        }
+        $("#v3d-close").focus();
+      };
+      const kapat3d = () => { $("#v3d").hidden = true; document.body.style.overflow = ""; $("#ac-3d").focus(); };
+      $("#v3d-close").onclick = kapat3d;
+      document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("#v3d").hidden) kapat3d(); });
+    }
+
     $("#q-minus").onclick = () => { adet = Math.max(1, adet - 1); $("#q-val").textContent = adet; };
     $("#q-plus").onclick = () => { adet = Math.min(20, adet + 1); $("#q-val").textContent = adet; };
     $("#add").onclick = () => sepeteEkle(u.id, v.barkod, adet);
