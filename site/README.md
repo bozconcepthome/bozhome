@@ -54,6 +54,10 @@ Henüz Trendyol'a girilmemiş ürünler `assets/js/ek_urunler.js` dosyasındadı
 - Ürün adı ("S Tel Yan Sehpa") geçicidir.
 - Sahne betikleri: `tools/sahne/` (`sahne.py`, `glb.py`). Örnek: `blender -b -P tools/sahne/sahne.py -- <klasör> salon 1200 1800 400` (klasörde `model.obj` bulunmalı).
 
+## Ana sayfa arka plan videosu
+
+Açılıştaki başlık alanının arkasında `assets/video/hero-s-tel.mp4` (1080×1920) oynar; telefonda otomatik olarak `hero-s-tel-m.mp4` (720×1280) seçilir. Video sessiz, döngülü ve ekran dışına çıkınca durur; "hareketi azalt" ayarı açık olanlarda yalnız kapak karesi (`hero-s-tel.webp`) görünür. Videoyu değiştirmek için aynı adlarla üç dosyayı değiştirmeniz yeterlidir. Kaynak video 1080×1920 olduğu için bu çözünürlükten büyütülmedi.
+
 ## Yönetim paneli (`yonetim.html`)
 
 Sitenin sunucusu/veritabanı olmadığı için panel şöyle çalışır:

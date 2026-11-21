@@ -21,7 +21,13 @@
   <main>
     <!-- HERO -->
     <section class="hero">
-      <div class="wrap">
+      <div class="hero-bg" aria-hidden="true">
+        <video id="hero-video" muted loop playsinline autoplay preload="auto" poster="assets/video/hero-s-tel.webp" disablepictureinpicture tabindex="-1">
+          <source src="assets/video/hero-s-tel-m.mp4" type="video/mp4" media="(max-width: 700px)">
+          <source src="assets/video/hero-s-tel.mp4" type="video/mp4">
+        </video>
+      </div>
+      <div class="wrap hero-inner">
         <span class="eyebrow reveal">Kıvrım Tel Sehpa</span>
         <h1 class="reveal">Bir sehpa.<br>İki iş.</h1>
         <p class="lead reveal">Üstü sehpa, yanı dergilik. Tel yapısı odayı doldurmaz, ışığı geçirir.</p>
@@ -30,6 +36,11 @@
           <a class="btn btn-ghost btn-lg" id="hero-link" href="#">Daha fazla bilgi</a>
         </div>
         <p class="hero-price" id="hero-price"></p>
+      </div>
+    </section>
+
+    <section class="vitrin" aria-label="Vitrin ürünü">
+      <div class="wrap">
         <a class="stage" id="hero-stage" href="#" aria-label="Ürüne git"><img id="hero-img" alt="" fetchpriority="high"></a>
         <div class="dots" id="hero-dots" role="group" aria-label="Renk seçin"></div>
         <div class="dots-label" id="hero-color" aria-live="polite"></div>
@@ -233,6 +244,17 @@
       ["Kart bilgilerim güvende mi?", "Kart ödemeleri bankanın güvenli ödeme sayfası üzerinden 3D Secure ile alınır; kart bilgileriniz sitemizde saklanmaz."],
     ];
     $("#faq").innerHTML = sss.map(([q, a], i) => `<details${i === 0 ? " open" : ""}><summary>${esc(q)}</summary><p>${esc(a)}</p></details>`).join("");
+
+    /* ---- Hero arka plan videosu: ekran dışında dur, hareket azaltma tercihinde oynatma ---- */
+    const hv = $("#hero-video");
+    if (hv) {
+      const hareketYok = matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (hareketYok) { hv.removeAttribute("autoplay"); hv.pause(); }
+      else {
+        hv.play().catch(() => {});
+        if ("IntersectionObserver" in window) new IntersectionObserver((g) => g.forEach((e) => { if (e.isIntersecting) hv.play().catch(() => {}); else hv.pause(); }), { threshold: 0.1 }).observe(hv);
+      }
+    }
 
     belirt();
   });
