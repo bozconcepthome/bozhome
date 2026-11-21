@@ -201,7 +201,7 @@
           <div class="cols">
             <div>
               ${logo()}
-              <p style="margin-top:16px;max-width:32ch">Metal tel sehpalar, raflar ve ev düzenleyiciler. Az eşya, çok düzen.</p>
+              <p class="slogan">Mekâna karakter katan tasarımlar.</p><p style="max-width:34ch">Metal tel sehpalar, raflar ve ev düzenleyiciler.</p>
               <div class="pay-icons" aria-label="Ödeme yöntemleri"><span>Visa</span><span>Mastercard</span><span>Troy</span><span>Kapıda ödeme</span><span>Havale</span></div>
             </div>
             <div><h4>Koleksiyonlar</h4><ul>${kols}</ul></div>
@@ -330,10 +330,11 @@
     const u = urunBul(id);
     const v = varyantBul(u, barkod);
     if (!u || !v) return;
-    if (u.yakinda) { bildir("Bu ürün çok yakında satışta"); return; }
-    if (!v.stok) { bildir("Bu renk şu an tükendi"); return; }
+    if (u.yakinda) { bildir("Bu ürün çok yakında satışta"); return false; }
+    if (!v.stok) { bildir("Bu renk şu an tükendi"); return false; }
     Sepet.ekle(id, v.barkod, adet);
     bildir("Sepete eklendi", `${u.ad}${v.renk ? ` · ${v.renk}` : ""}`);
+    return true;
   }
 
   /* ---------- Ürün kartı ---------- */
@@ -349,7 +350,7 @@
     const renkler = u.varyantlar.filter((x) => x.hex).slice(0, 6);
     return `<article class="card reveal${var_ || u.yakinda ? "" : " is-out"}">
       ${rozet}
-      <a class="card-media" href="urun.html?id=${u.id}" aria-label="${esc(u.ad)} detayları">
+      <a class="card-media" href="urun.html?id=${u.id}" tabindex="-1" aria-hidden="true">
         <img src="${gorselYol(v.gorseller[0], true)}" alt="${esc(u.ad)}" loading="lazy" decoding="async">
         ${ikinci ? `<img class="alt" src="${gorselYol(ikinci, true)}" alt="" loading="lazy" decoding="async">` : ""}
       </a>
@@ -379,7 +380,14 @@
   document.addEventListener("click", (e) => {
     const t = e.target.closest("[data-add],[data-open-cart],[data-close-cart],[data-qty],[data-remove]");
     if (!t) return;
-    if (t.dataset.add) { sepeteEkle(t.dataset.add, t.dataset.v); }
+    if (t.dataset.add) {
+      if (sepeteEkle(t.dataset.add, t.dataset.v) && t.classList.contains("add-btn")) {
+        // Geri bildirim: + simgesi kısa süre onaya döner
+        if (!t.dataset.etiket) t.dataset.etiket = t.getAttribute("aria-label") || "";
+        t.classList.add("added"); t.innerHTML = ikon.check; t.setAttribute("aria-label", "Sepete eklendi");
+        clearTimeout(t._z); t._z = setTimeout(() => { t.classList.remove("added"); t.innerHTML = ikon.plus; t.setAttribute("aria-label", t.dataset.etiket); }, 1400);
+      }
+    }
     else if (t.hasAttribute("data-open-cart")) { cekmeceAc(); }
     else if (t.hasAttribute("data-close-cart")) { cekmeceKapat(); }
     else if (t.dataset.qty) {

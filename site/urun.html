@@ -121,7 +121,7 @@
       $("#thumbs").innerHTML = v.gorseller.length > 1 ? v.gorseller.map((g, i) =>
         `<button type="button" data-i="${i}" aria-label="Fotoğraf ${i + 1}"><img src="${gorselYol(g, true)}" alt="" loading="lazy"></button>`).join("") : "";
       $("#sticky-buy").innerHTML = `<span class="price">${u.yakinda ? "Yakında" : para(v.fiyat)}</span>
-        <button class="btn btn-primary" type="button" ${v.stok ? `data-add="${u.id}" data-v="${v.barkod}"` : "disabled"}>${u.yakinda ? "Çok yakında" : v.stok ? "Sepete ekle" : "Tükendi"}</button>`;
+        <button class="btn btn-dark" type="button" ${v.stok ? `data-add="${u.id}" data-v="${v.barkod}"` : "disabled"}>${u.yakinda ? "Çok yakında" : v.stok ? "Sepete ekle" : "Tükendi"}</button>`;
       foto(0);
     };
     const foto = (i) => {

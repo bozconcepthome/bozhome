@@ -54,15 +54,19 @@ Henüz Trendyol'a girilmemiş ürünler `assets/js/ek_urunler.js` dosyasındadı
 - Ürün adı ("S Tel Yan Sehpa") geçicidir.
 - Sahne betikleri: `tools/sahne/` (`sahne.py`, `glb.py`). Örnek: `blender -b -P tools/sahne/sahne.py -- <klasör> salon 1200 1800 400` (klasörde `model.obj` bulunmalı).
 
-## Marka tasarımı (koyu editoryal, V1)
+## Marka tasarımı (koyu editoryal)
 
-Marka yönergesi: `docs/BOZ_BRAND_SYSTEM.md`, token'lar: `docs/boz-design-tokens.css` (site için `assets/css/style.css` içindeki `--boz-*` değişkenlerine uyarlandı).
+Marka yönergesi: `docs/BOZ_BRAND_SYSTEM.md`, token'lar: `docs/boz-design-tokens.css` (site için `assets/css/style.css` içindeki değişkenlere uyarlandı). Mağazanın tamamı (ana sayfa, ürün, sepet, ödeme) koyu temada; yönetim paneli açık temada kalır (`.panel-body`).
 
-- **Uygulananlar:** header (koyu, arama, mobil menü, sepet) ve ana sayfa hero'su. Sayfanın geri kalanı (vitrin, ürün kartları, hikâye, SSS, alt bilgi) henüz önceki açık temada.
-- **Renk:** gece laciverti `#0A0B1A`, indigo `#1424A8` (yalnız ışık/çizgi; metinde kullanılmaz, koyu zeminde 1,7:1), füme `#2B2B32`, terakota `#C45A3C`, kırık beyaz `#F6F5F2`.
-- **Kontrast kararı:** terakota üzerinde kırık beyaz metin 3,95:1 (yetersiz). Birincil düğmelerde gece laciverti metin kullanılır (4,53:1). Açık zeminde terakota metin yerine `--accent-ink` (`#A8432A`).
+- **Renk:** gece laciverti `#0A0B1A` zemin, indigo `#1424A8` yalnız ışık/çizgi (metinde kullanılmaz: koyu zeminde 1,7:1), füme `#2B2B32`, terakota `#C45A3C` birincil düğme, kırık beyaz `#F6F5F2` metin.
+- **Kontrast:** terakota üstünde kırık beyaz 3,95:1 (yetersiz) → birincil düğmede gece laciverti metin (4,53:1); koyu zeminde terakota metin için `--accent-ink` `#E0775A` (6,5:1).
 - **Tipografi:** Manrope 400–800.
-- **Hero videosu:** sessiz, döngülü, duraklatma düğmeli; "hareketi azalt" veya veri tasarrufu açıkken yüklenmez, yalnız kapak karesi görünür.
+- **Hareket (tümü "hareketi azalt"ta kapanır, JS yoksa içerik görünür kalır):**
+  - Hero açılışı (bir kez): başlık satırları maskeden yükselir, video çerçevesi perde gibi açılır.
+  - Hikâye bölümü (bir kez): ürün fotoğrafı ince indigo "tel" çizgisiyle soldan açılır.
+  - Geri bildirim: düğmeler üzerine gelince kıpırdar, basınca çöker; fotoğraflar çerçevede 1,03 yakınlaşır; bağlantı altı çizgisi çizilir; sepete ekleyince + simgesi onaya döner; filtre değişimi View Transitions ile.
+  - Kaydırınca solup gelen bölüm efektleri kaldırıldı.
+- **Mobil:** tüm dokunma hedefleri ≥44 px; kartın tamamı ürün bağlantısıdır (tek sekme durağı).
 
 ## Ana sayfa arka plan videosu
 

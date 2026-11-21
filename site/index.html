@@ -13,6 +13,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/style.css">
+  <script>document.documentElement.classList.add("js")</script>
 </head>
 <body>
   <a class="sr-only" href="#koleksiyon">İçeriğe geç</a>
@@ -32,7 +33,7 @@
         </div>
         <div class="hero-copy">
           <p class="hero-kicker">Yeni yan sehpa</p>
-          <h1 id="hero-baslik">Bir sehpa.<br>İki iş.</h1>
+          <h1 id="hero-baslik"><span class="ln"><span>Bir sehpa.</span></span><span class="ln"><span>İki iş.</span></span></h1>
           <p class="lead">Üstü sehpa, yanı dergilik. Tel yapısı odayı doldurmaz, ışığı geçirir.</p>
           <div class="hero-actions">
             <a class="btn btn-primary btn-lg" href="index.html#koleksiyon" data-kol="Tümü">Koleksiyonu keşfet</a>
@@ -42,43 +43,44 @@
       </div>
     </section>
 
-    <section class="vitrin" aria-labelledby="vitrin-baslik">
-      <div class="wrap">
-        <h2 id="vitrin-baslik" class="sr-only">Öne çıkan ürün</h2>
-        <a class="stage" id="hero-stage" href="#" aria-label="Öne çıkan ürüne git"><img id="hero-img" alt="" width="1200" height="1800" fetchpriority="low"></a>
-        <div class="dots" id="hero-dots" role="group" aria-label="Renk seçin"></div>
-        <div class="dots-label" id="hero-color" aria-live="polite"></div>
-        <div class="vitrin-info">
-          <p class="vitrin-ad" id="vitrin-ad"></p>
-          <p class="hero-price" id="hero-price"></p>
-          <button class="btn btn-ghost" type="button" id="hero-add">Sepete ekle</button>
-          <a class="more-link" id="hero-link" href="#">Ürünü incele</a>
-        </div>
-      </div>
-    </section>
-
     <!-- GÜVEN -->
     <section class="trust" aria-label="Alışveriş güvencesi">
       <div class="wrap"><ul id="trust-list"></ul></div>
     </section>
 
+    <section class="vitrin" aria-labelledby="vitrin-ad">
+      <div class="wrap vitrin-grid">
+        <a class="stage" id="hero-stage" href="#" aria-label="Öne çıkan ürüne git"><img id="hero-img" alt="" width="1200" height="1800" loading="lazy"></a>
+        <div class="vitrin-info">
+          <p class="eyebrow-v">Öne çıkan</p>
+          <h2 class="vitrin-ad" id="vitrin-ad"></h2>
+          <p class="hero-price" id="hero-price"></p>
+          <div class="dots" id="hero-dots" role="group" aria-label="Renk seçin"></div>
+          <div class="dots-label" id="hero-color" aria-live="polite"></div>
+          <div class="vitrin-actions">
+            <button class="btn btn-primary btn-lg" type="button" id="hero-add">Sepete ekle</button>
+            <a class="more-link" id="hero-link" href="#">Ürün ayrıntıları</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- KOLEKSİYONLAR -->
     <section class="section" aria-labelledby="kol-title">
       <div class="wrap">
-        <div class="section-head reveal">
-          <span class="eyebrow">Koleksiyonlar</span>
-          <h2 id="kol-title">Evin her köşesi için.</h2>
+        <div class="section-head">
+          <h2 id="kol-title">Koleksiyonlar</h2>
+          <p>Sehpadan banyo rafına, evin her köşesi için tel ve metal parçalar.</p>
         </div>
         <div class="kol-grid" id="kol-grid"></div>
       </div>
     </section>
 
     <!-- ÜRÜNLER -->
-    <section class="section" id="koleksiyon" style="padding-top:20px">
+    <section class="section section-alt" id="koleksiyon" aria-labelledby="urunler-baslik">
       <div class="wrap">
-        <div class="section-head reveal" style="margin-bottom:30px">
-          <span class="eyebrow">Tüm ürünler</span>
-          <h2>Seçkimize göz atın.</h2>
+        <div class="section-head" style="margin-bottom:28px">
+          <h2 id="urunler-baslik">Tüm ürünler</h2>
           <p>Beğendiğinizi tek dokunuşla sepete ekleyin. Renk seçimi ürün sayfasında.</p>
         </div>
         <div class="filters" role="group" aria-label="Koleksiyon filtresi" id="filters"></div>
@@ -100,40 +102,40 @@
     </section>
 
     <!-- HİKÂYE -->
-    <section class="story" id="hikaye">
+    <section class="story" id="hikaye" aria-labelledby="hikaye-baslik">
       <div class="wrap">
-        <div class="story-art reveal" aria-hidden="true"><img id="story-img" alt="" loading="lazy"></div>
-        <div class="reveal">
-          <span class="eyebrow">Hikâyemiz</span>
-          <h2>Az eşya.<br>Çok düzen.</h2>
+        <div class="story-media" id="story-media"><img id="story-img" alt="S Tel Yan Sehpa önden: kare tel çerçeve içinde S biçiminde kıvrılan dergilik bölmesi" width="1200" height="1800" loading="lazy"></div>
+        <div>
+          <h2 id="hikaye-baslik">Az eşya.<br>Çok düzen.</h2>
           <p>Evlerimiz küçüldü, eşyalarımız çoğaldı. Biz de hem güzel görünen hem bir iş gören parçalar tasarlıyoruz: sehpa olan dergilik, raf olan banyo düzenleyici.</p>
           <ol class="steps">
             <li><div><b>Seçin.</b> Ürünü ve rengini seçip sepete ekleyin. Sepetiniz siz ayrılsanız da saklanır.</div></li>
             <li><div><b>Tek sayfada ödeyin.</b> Kart, kapıda ödeme ya da havale. Üyelik gerekmez.</div></li>
             <li><div><b>Kapınıza gelsin.</b> <span id="ship-time"></span> içinde kargoda. Beğenmezseniz <span id="return-days"></span> gün içinde iade edin.</div></li>
           </ol>
-          <a class="btn" href="#koleksiyon">Koleksiyonu gör</a>
+          <a class="btn btn-ghost" href="#koleksiyon">Koleksiyonu gör</a>
         </div>
       </div>
     </section>
 
     <!-- SSS -->
-    <section class="section" id="sss">
+    <section class="section" id="sss" aria-labelledby="sss-baslik">
       <div class="wrap">
-        <div class="section-head reveal">
-          <span class="eyebrow">Sık sorulanlar</span>
-          <h2>Aklınızda soru kalmasın.</h2>
+        <div class="section-head">
+          <h2 id="sss-baslik">Sık sorulanlar</h2>
         </div>
-        <div class="faq reveal" id="faq"></div>
+        <div class="faq" id="faq"></div>
       </div>
     </section>
 
     <!-- CTA -->
     <section class="cta-band">
       <div class="wrap">
-        <h2>Okuma köşenizi kurun.</h2>
-        <p>Dergiler yerde kalmasın. Tel sehpalarla salonunuza hafiflik katın.</p>
-        <a class="btn btn-primary btn-lg" href="index.html?k=Sehpalar#koleksiyon" data-kol="Sehpalar">Sehpaları gör</a>
+        <div>
+          <h2>Okuma köşenizi kurun.</h2>
+          <p>Dergiler yerde kalmasın. Tel sehpalarla salonunuza hafiflik katın.</p>
+        </div>
+        <a class="btn btn-ghost btn-lg" href="index.html?k=Sehpalar#koleksiyon" data-kol="Sehpalar">Sehpaları gör</a>
       </div>
     </section>
   </main>
@@ -232,19 +234,25 @@
       try { const u = new URL(location); k === "Tümü" ? u.searchParams.delete("k") : u.searchParams.set("k", k); history.replaceState(null, "", u); } catch (e) {}
       if (kaydir) document.getElementById("koleksiyon").scrollIntoView({ behavior: "smooth" });
     };
-    $("#filters").addEventListener("click", (e) => { const b = e.target.closest(".chip"); if (b) kolSec(b.dataset.k); });
+    const gecis = (fn) => (document.startViewTransition && !matchMedia("(prefers-reduced-motion: reduce)").matches) ? document.startViewTransition(fn) : fn();
+    $("#filters").addEventListener("click", (e) => { const b = e.target.closest(".chip"); if (b) gecis(() => kolSec(b.dataset.k)); });
     document.addEventListener("click", (e) => {
       const b = e.target.closest("[data-kol],[data-kol-link]"); if (!b) return;
       e.preventDefault(); kolSec(b.dataset.kol || b.dataset.kolLink, true);
     });
     let qz; $("#q").addEventListener("input", (e) => { clearTimeout(qz); qz = setTimeout(() => { durum.q = e.target.value; durum.sayfa = 1; listele(); }, 160); });
-    $("#sort").addEventListener("change", (e) => { durum.sort = e.target.value; durum.sayfa = 1; listele(); });
+    $("#sort").addEventListener("change", (e) => { durum.sort = e.target.value; durum.sayfa = 1; gecis(listele); });
     $("#more").addEventListener("click", () => { durum.sayfa++; listele(); });
     listele();
 
     /* ---- Hikâye görseli ---- */
-    const hik = vit.varyantlar.find(v => v.gorseller.length > 2) || vit.varyantlar[0];
-    $("#story-img").src = gorselYol(hik.gorseller[2] || hik.gorseller[0]);
+    const sTel = urunBul("s-tel-yan-sehpa");
+    const hik = sTel ? sTel.varyantlar[0] : (vit.varyantlar.find(v => v.gorseller.length > 2) || vit.varyantlar[0]);
+    $("#story-img").src = gorselYol(sTel ? (hik.gorseller[2] || hik.gorseller[0]) : (hik.gorseller[2] || hik.gorseller[0]));
+    /* Ayrılmış an: fotoğraf görünür olunca bir kez açılır */
+    const sm = $("#story-media");
+    if (!("IntersectionObserver" in window) || matchMedia("(prefers-reduced-motion: reduce)").matches) sm.classList.add("is-in");
+    else { const io = new IntersectionObserver((g) => { if (g.some((e) => e.isIntersecting)) { sm.classList.add("is-in"); io.disconnect(); } }, { threshold: 0.3 }); io.observe(sm.parentElement); }  // clip-path, hedefin kendi alanını sıfırladığı için kapsayıcı gözlenir
 
     /* ---- SSS ---- */
     const sss = [
