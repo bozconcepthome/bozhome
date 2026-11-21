@@ -252,6 +252,14 @@ section { scroll-margin-top: 70px; }
 .toast:not(.show) { visibility: hidden; transition: transform .35s cubic-bezier(.2,.8,.2,1), visibility 0s .35s; }
 .toast button { background: #fff; color: var(--ink); border: 0; border-radius: 999px; padding: 7px 14px; font-weight: 500; cursor: pointer; white-space: nowrap; }
 
+/* Bildirim kutusu: sabit genişlik, ad en fazla 2 satır, alt çubuğun üstünde */
+.toast { width: min(440px, calc(100% - 32px)); border-radius: 18px; padding: 12px 12px 12px 18px; gap: 12px; align-items: center; }
+#toast-msg { flex: 1; min-width: 0; line-height: 1.3; }
+#toast-msg b { display: block; font-weight: 600; }
+#toast-msg small { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-size: .82rem; opacity: .75; }
+.toast button { flex: none; }
+@media (max-width: 900px) { body.has-sticky .toast { bottom: calc(92px + env(safe-area-inset-bottom, 0px)); } }
+
 /* ---------- Product page ---------- */
 .crumbs { font-size: .82rem; color: var(--mute); padding: 22px 0 0; }
 .crumbs a { text-decoration: none; }

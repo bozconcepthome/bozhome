@@ -260,10 +260,12 @@
   }
 
   let toastZaman;
-  function bildir(mesaj) {
+  function bildir(mesaj, alt) {
     const t = $(".toast");
     if (!t) return;
-    $("#toast-msg").textContent = mesaj;
+    const m = $("#toast-msg");
+    if (alt) { m.innerHTML = ""; const b = document.createElement("b"); b.textContent = mesaj; const k = document.createElement("small"); k.textContent = alt; m.append(b, k); }
+    else m.textContent = mesaj;
     t.classList.add("show");
     clearTimeout(toastZaman);
     toastZaman = setTimeout(() => t.classList.remove("show"), 3200);
@@ -276,7 +278,7 @@
     if (u.yakinda) { bildir("Bu ürün çok yakında satışta"); return; }
     if (!v.stok) { bildir("Bu renk şu an tükendi"); return; }
     Sepet.ekle(id, v.barkod, adet);
-    bildir(`${u.ad}${v.renk ? ` (${v.renk})` : ""} sepete eklendi`);
+    bildir("Sepete eklendi", `${u.ad}${v.renk ? ` · ${v.renk}` : ""}`);
   }
 
   /* ---------- Ürün kartı ---------- */
