@@ -54,6 +54,16 @@ Henüz Trendyol'a girilmemiş ürünler `assets/js/ek_urunler.js` dosyasındadı
 - Ürün adı ("S Tel Yan Sehpa") geçicidir.
 - Sahne betikleri: `tools/sahne/` (`sahne.py`, `glb.py`). Örnek: `blender -b -P tools/sahne/sahne.py -- <klasör> salon 1200 1800 400` (klasörde `model.obj` bulunmalı).
 
+## Marka tasarımı (koyu editoryal, V1)
+
+Marka yönergesi: `docs/BOZ_BRAND_SYSTEM.md`, token'lar: `docs/boz-design-tokens.css` (site için `assets/css/style.css` içindeki `--boz-*` değişkenlerine uyarlandı).
+
+- **Uygulananlar:** header (koyu, arama, mobil menü, sepet) ve ana sayfa hero'su. Sayfanın geri kalanı (vitrin, ürün kartları, hikâye, SSS, alt bilgi) henüz önceki açık temada.
+- **Renk:** gece laciverti `#0A0B1A`, indigo `#1424A8` (yalnız ışık/çizgi; metinde kullanılmaz, koyu zeminde 1,7:1), füme `#2B2B32`, terakota `#C45A3C`, kırık beyaz `#F6F5F2`.
+- **Kontrast kararı:** terakota üzerinde kırık beyaz metin 3,95:1 (yetersiz). Birincil düğmelerde gece laciverti metin kullanılır (4,53:1). Açık zeminde terakota metin yerine `--accent-ink` (`#A8432A`).
+- **Tipografi:** Manrope 400–800.
+- **Hero videosu:** sessiz, döngülü, duraklatma düğmeli; "hareketi azalt" veya veri tasarrufu açıkken yüklenmez, yalnız kapak karesi görünür.
+
 ## Ana sayfa arka plan videosu
 
 Açılıştaki başlık alanının arkasında `assets/video/hero-s-tel.mp4` (1080×1920) oynar; telefonda otomatik olarak `hero-s-tel-m.mp4` (720×1280) seçilir. Video sessiz, döngülü ve ekran dışına çıkınca durur; "hareketi azalt" ayarı açık olanlarda yalnız kapak karesi (`hero-s-tel.webp`) görünür. Videoyu değiştirmek için aynı adlarla üç dosyayı değiştirmeniz yeterlidir. Kaynak video 1080×1920 olduğu için bu çözünürlükten büyütülmedi.

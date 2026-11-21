@@ -53,6 +53,8 @@
     cash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="6" width="19" height="12" rx="2"/><circle cx="12" cy="12" r="2.6"/><path d="M6 9.5v5M18 9.5v5"/></svg>',
     ret: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9h11a5 5 0 0 1 0 10H8"/><path d="M8 5 4 9l4 4"/></svg>',
     card: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="5" width="19" height="14" rx="2"/><path d="M2.5 10h19M6 15h4"/></svg>',
+    menu: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>',
+    pause: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5h3v14H8zM13 5h3v14h-3z" fill="currentColor"/></svg>',
     check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>',
     search: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg>',
     play: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13a.8.8 0 0 0 1.2.7l10.4-6.5a.8.8 0 0 0 0-1.4L9.2 4.8A.8.8 0 0 0 8 5.5Z" fill="currentColor"/></svg>',
@@ -105,11 +107,14 @@
   window.addEventListener("storage", (e) => { if (e.key === ANAHTAR) { sepet = depoOku(); dinleyiciler.forEach((f) => f()); } });
 
   /* ---------- Başlık & alt bilgi ---------- */
-  const logo = () => `<a class="logo" href="index.html" aria-label="${esc(M.ad)} ana sayfa"><span class="mark">Boz</span><span class="word">Concept Home</span></a>`;
+  const logo = () => `<a class="logo" href="index.html" aria-label="${esc(M.ad)} ana sayfa" translate="no"><span class="mark">Boz</span><span class="word">Concept Home</span></a>`;
 
   function baslikCiz() {
     const yer = $("#site-header");
     if (!yer) return;
+    const kols = window.KOLEKSIYONLAR || [];
+    const link = (k) => `index.html?k=${encodeURIComponent(k)}#koleksiyon`;
+    const say = (k) => URUNLER.filter((u) => u.koleksiyon === k).length;
     yer.outerHTML = `
       <div class="announce" role="note">
         <span>${para(M.ucretsizKargoLimiti)} üzeri ücretsiz kargo</span>
@@ -117,19 +122,67 @@
         <span>${M.iadeGunu} gün kolay iade</span>
       </div>
       <header class="site-header">
-        <div class="wrap">
+        <div class="wrap bar">
           ${logo()}
           <nav class="nav" aria-label="Ana menü">
-            <a href="index.html#koleksiyon">Koleksiyon</a>
-            <a href="index.html#koleksiyon" data-kol-link="Sehpalar">Sehpalar</a>
+            ${kols.map((k) => `<a href="${link(k)}" data-kol-link="${esc(k)}">${esc(k)}</a>`).join("")}
             <a href="index.html#hikaye">Hikâyemiz</a>
-            <a href="index.html#sss">Sorular</a>
           </nav>
-          <button class="cart-btn" type="button" data-open-cart aria-haspopup="dialog">
-            ${ikon.bag}<span class="label">Sepet</span><span class="cart-count" aria-live="polite">0</span>
-          </button>
+          <button class="icon-act" type="button" data-arama aria-label="Ara" aria-expanded="false" aria-controls="arama-panel">${ikon.search}</button>
+          <button class="icon-act cart-btn" type="button" data-open-cart aria-haspopup="dialog" aria-label="Sepet, 0 ürün">${ikon.bag}<span class="cart-count" data-n="0" aria-hidden="true">0</span></button>
+          <button class="icon-act menu-btn" type="button" data-menu aria-label="Menüyü aç" aria-expanded="false" aria-controls="mobil-menu">${ikon.menu}</button>
         </div>
+        <div class="arama" id="arama-panel" hidden>
+          <div class="wrap"><form action="index.html#koleksiyon" method="get" role="search">
+            <label class="sr-only" for="arama-q">Ürün ara</label>
+            <input id="arama-q" name="q" type="search" placeholder="Sehpa, raf, havluluk…" autocomplete="off" enterkeyhint="search">
+            <button class="btn btn-primary" type="submit">Ara</button>
+          </form></div>
+        </div>
+        <nav class="mobil-menu" id="mobil-menu" aria-label="Menü" hidden>
+          <div class="wrap">
+            ${kols.map((k) => `<a href="${link(k)}" data-kol-link="${esc(k)}">${esc(k)}<small>${say(k)} ürün</small></a>`).join("")}
+            <div class="alt">
+              <a href="index.html#hikaye">Hikâyemiz</a>
+              <a href="index.html#sss">Sık sorulanlar</a>
+            </div>
+          </div>
+        </nav>
       </header>`;
+  }
+
+  /* Arama paneli ve mobil menü */
+  function ustEtkilesim() {
+    const bas = $(".site-header");
+    if (!bas) return;
+    const arama = $("#arama-panel"), menu = $("#mobil-menu");
+    const aBtn = $("[data-arama]"), mBtn = $("[data-menu]");
+    const ac = (panel, btn, acik) => {
+      panel.hidden = !acik; btn.setAttribute("aria-expanded", String(acik));
+      if (btn === mBtn) { btn.setAttribute("aria-label", acik ? "Menüyü kapat" : "Menüyü aç"); btn.innerHTML = acik ? ikon.close : ikon.menu; document.body.style.overflow = acik ? "hidden" : ""; }
+    };
+    const kapat = (odak) => {
+      if (!menu.hidden) { ac(menu, mBtn, false); if (odak) mBtn.focus(); }
+      if (!arama.hidden) { ac(arama, aBtn, false); if (odak) aBtn.focus(); }
+    };
+    aBtn.addEventListener("click", () => {
+      const acik = arama.hidden;
+      if (!menu.hidden) ac(menu, mBtn, false);
+      ac(arama, aBtn, acik);
+      if (acik) setTimeout(() => $("#arama-q").focus(), 30);
+    });
+    mBtn.addEventListener("click", () => {
+      const acik = menu.hidden;
+      if (!arama.hidden) ac(arama, aBtn, false);
+      ac(menu, mBtn, acik);
+    });
+    menu.addEventListener("click", (e) => { if (e.target.closest("a")) kapat(false); });
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape") kapat(true); });
+    // composedPath: tıklanan ikon yer değiştirse bile (menü ⇄ kapat) tıklama başlık içinde sayılır
+    document.addEventListener("click", (e) => { if (!e.composedPath().includes(bas)) kapat(false); });
+    matchMedia("(min-width: 1100px)").addEventListener("change", (e) => { if (e.matches && !menu.hidden) ac(menu, mBtn, false); });
+    const q = new URLSearchParams(location.search).get("q");
+    if (q) $("#arama-q").value = q;
   }
 
   function altBilgiCiz() {
@@ -214,6 +267,8 @@
     const sayac = $(".cart-count");
     if (sayac) {
       const yeni = String(Sepet.adet());
+      sayac.dataset.n = yeni;
+      const sb = $(".cart-btn"); if (sb) sb.setAttribute("aria-label", `Sepet, ${yeni} ürün`);
       if (sayac.textContent !== yeni) { sayac.textContent = yeni; sayac.classList.remove("bump"); void sayac.offsetWidth; sayac.classList.add("bump"); }
     }
     const items = $("#drawer-items");
@@ -348,6 +403,7 @@
   /* ---------- Başlat ---------- */
   function baslat() {
     baslikCiz();
+    ustEtkilesim();
     altBilgiCiz();
     if (!document.body.dataset.noCart) cekmeceCiz();
     Sepet.dinle(cekmeceGuncelle);

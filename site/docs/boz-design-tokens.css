@@ -1,0 +1,13 @@
+/* Boz Concept Home — önerilen başlangıç tasarım token'ları. Mevcut stil sistemine uyarlayın. */
+:root {
+  --boz-bg: #0A0B1A;
+  --boz-indigo: #1424A8;
+  --boz-charcoal: #2B2B32;
+  --boz-terracotta: #C45A3C;
+  --boz-ivory: #F6F5F2;
+  --boz-font: 'Manrope', system-ui, -apple-system, sans-serif;
+  --boz-max-content: 1280px;
+  --boz-radius: 14px;
+  --boz-ease: cubic-bezier(.22, 1, .36, 1);
+}
+/* Renk kullanmadan önce WCAG kontrastını etkileşim bazında doğrulayın. */

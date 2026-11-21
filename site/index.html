@@ -5,13 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Boz Concept Home</title>
   <meta name="description" content="Boz Concept Home: metal tel sehpalar, kitaplıklar, banyo ve mutfak düzenleyicileri. Ücretsiz kargo, kapıda ödeme, kolay iade.">
-  <meta name="theme-color" content="#ffffff">
+  <meta name="theme-color" content="#0A0B1A">
   <meta property="og:title" content="Boz Concept Home">
   <meta property="og:description" content="Metal tel sehpalar, raflar ve ev düzenleyiciler.">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='48' fill='%23c2512f'/%3E%3Ctext x='50' y='68' font-size='54' text-anchor='middle' font-family='Georgia' fill='%23ffffff'%3EB%3C/text%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
@@ -20,30 +20,40 @@
 
   <main>
     <!-- HERO -->
-    <section class="hero">
-      <div class="hero-bg" aria-hidden="true">
-        <video id="hero-video" muted loop playsinline autoplay preload="auto" poster="assets/video/hero-s-tel.webp" disablepictureinpicture tabindex="-1">
-          <source src="assets/video/hero-s-tel-m.mp4" type="video/mp4" media="(max-width: 700px)">
-          <source src="assets/video/hero-s-tel.mp4" type="video/mp4">
-        </video>
-      </div>
-      <div class="wrap hero-inner">
-        <span class="eyebrow reveal">Kıvrım Tel Sehpa</span>
-        <h1 class="reveal">Bir sehpa.<br>İki iş.</h1>
-        <p class="lead reveal">Üstü sehpa, yanı dergilik. Tel yapısı odayı doldurmaz, ışığı geçirir.</p>
-        <div class="hero-cta reveal">
-          <button class="btn btn-primary btn-lg" type="button" id="hero-add">Sepete ekle</button>
-          <a class="btn btn-ghost btn-lg" id="hero-link" href="#">Daha fazla bilgi</a>
+    <section class="hero" aria-labelledby="hero-baslik">
+      <div class="wrap hero-grid">
+        <div class="hero-media">
+          <img class="poster" src="assets/video/hero-s-tel.webp" alt="S Tel Yan Sehpa: kare tel gövde ve içinde S biçiminde kıvrılan dergilik bölmesi" width="1080" height="1920" fetchpriority="high" decoding="async">
+          <video id="hero-video" muted loop playsinline preload="auto" disablepictureinpicture tabindex="-1" aria-hidden="true" data-src="assets/video/hero-s-tel.mp4" data-src-m="assets/video/hero-s-tel-m.mp4"></video>
+          <button class="hero-pause" id="hero-pause" type="button" aria-pressed="false" aria-label="Arka plan videosunu duraklat">
+            <svg class="i-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5h3v14H8zM13 5h3v14h-3z" fill="currentColor"/></svg>
+            <svg class="i-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13a.8.8 0 0 0 1.2.7l10.4-6.5a.8.8 0 0 0 0-1.4L9.2 4.8A.8.8 0 0 0 8 5.5Z" fill="currentColor"/></svg>
+          </button>
         </div>
-        <p class="hero-price" id="hero-price"></p>
+        <div class="hero-copy">
+          <p class="hero-kicker">Yeni yan sehpa</p>
+          <h1 id="hero-baslik">Bir sehpa.<br>İki iş.</h1>
+          <p class="lead">Üstü sehpa, yanı dergilik. Tel yapısı odayı doldurmaz, ışığı geçirir.</p>
+          <div class="hero-actions">
+            <a class="btn btn-primary btn-lg" href="index.html#koleksiyon" data-kol="Tümü">Koleksiyonu keşfet</a>
+            <a class="hero-link" href="urun.html?id=s-tel-yan-sehpa">S Tel Yan Sehpa&rsquo;yı incele</a>
+          </div>
+        </div>
       </div>
     </section>
 
-    <section class="vitrin" aria-label="Vitrin ürünü">
+    <section class="vitrin" aria-labelledby="vitrin-baslik">
       <div class="wrap">
-        <a class="stage" id="hero-stage" href="#" aria-label="Ürüne git"><img id="hero-img" alt="" fetchpriority="high"></a>
+        <h2 id="vitrin-baslik" class="sr-only">Öne çıkan ürün</h2>
+        <a class="stage" id="hero-stage" href="#" aria-label="Öne çıkan ürüne git"><img id="hero-img" alt="" width="1200" height="1800" fetchpriority="low"></a>
         <div class="dots" id="hero-dots" role="group" aria-label="Renk seçin"></div>
         <div class="dots-label" id="hero-color" aria-live="polite"></div>
+        <div class="vitrin-info">
+          <p class="vitrin-ad" id="vitrin-ad"></p>
+          <p class="hero-price" id="hero-price"></p>
+          <button class="btn btn-ghost" type="button" id="hero-add">Sepete ekle</button>
+          <a class="more-link" id="hero-link" href="#">Ürünü incele</a>
+        </div>
       </div>
     </section>
 
@@ -154,6 +164,7 @@
       const yeni = new Image();
       yeni.onload = () => { img.src = yeni.src; img.alt = `${vit.ad} – ${v.renk}`; img.style.opacity = 1; };
       yeni.src = kolBuyuk(v);
+      $("#vitrin-ad").textContent = vit.ad;
       $("#hero-price").innerHTML = `<b>${para(v.fiyat)}</b>${v.renk ? ` · ${esc(v.renk)}` : ""}`;
       $("#hero-color").textContent = vits.length > 1 ? `${vits.length} renk seçeneği` : "";
       $("#hero-link").href = $("#hero-stage").href = `urun.html?id=${vit.id}&v=${v.barkod}`;
@@ -245,14 +256,25 @@
     ];
     $("#faq").innerHTML = sss.map(([q, a], i) => `<details${i === 0 ? " open" : ""}><summary>${esc(q)}</summary><p>${esc(a)}</p></details>`).join("");
 
-    /* ---- Hero arka plan videosu: ekran dışında dur, hareket azaltma tercihinde oynatma ---- */
-    const hv = $("#hero-video");
+    /* ---- Hero videosu: tercihlere saygı, duraklatma düğmesi ---- */
+    const hv = $("#hero-video"), hp = $("#hero-pause");
     if (hv) {
+      const bag = navigator.connection || {};
       const hareketYok = matchMedia("(prefers-reduced-motion: reduce)").matches;
-      if (hareketYok) { hv.removeAttribute("autoplay"); hv.pause(); }
+      const dusuk = bag.saveData || /(^|-)2g$/.test(bag.effectiveType || "");
+      let elleDurdu = false;
+      if (hareketYok || dusuk) { hv.remove(); hp.remove(); }
       else {
-        hv.play().catch(() => {});
-        if ("IntersectionObserver" in window) new IntersectionObserver((g) => g.forEach((e) => { if (e.isIntersecting) hv.play().catch(() => {}); else hv.pause(); }), { threshold: 0.1 }).observe(hv);
+        hv.src = matchMedia("(max-width: 700px)").matches ? hv.dataset.srcM : hv.dataset.src;
+        const oynat = () => hv.play().catch(() => {});
+        hv.addEventListener("loadeddata", oynat, { once: true });
+        hp.addEventListener("click", () => {
+          elleDurdu = !elleDurdu;
+          hp.setAttribute("aria-pressed", String(elleDurdu));
+          hp.setAttribute("aria-label", elleDurdu ? "Arka plan videosunu oynat" : "Arka plan videosunu duraklat");
+          if (elleDurdu) hv.pause(); else oynat();
+        });
+        if ("IntersectionObserver" in window) new IntersectionObserver((g) => g.forEach((e) => { if (e.isIntersecting) { if (!elleDurdu) oynat(); } else hv.pause(); }), { threshold: 0.15 }).observe(hv);
       }
     }
 
