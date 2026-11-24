@@ -413,6 +413,25 @@ TOOLS: list[Tool] = [
                "command": S, "x": I, "y": I, "x2": I, "y2": I, "text": S, "package": S, "number": S},
               ["action"]),
          phone, dangerous=True),
+    Tool("iphone",
+         "Kullanıcının iPhone'unda bir eylem yapar. Eylemler sıraya alınır ve yanıtın sonunda "
+         "iPhone'daki 'JARVIS Eylem' kısayolu tarafından çalıştırılır (Siri ile ya da arayüzdeki "
+         "düğmeyle). Bir yanıtta birden çok eylem kullanabilirsin. action değerleri:\n"
+         "open_app (name: 'WhatsApp', 'Instagram', 'Kamera'...) | open_url (url) | "
+         "call (number: telefon numarası; kişi adıysa önce recall ile numarayı bul) | message (number, text) | "
+         "alarm (time: 'HH:MM', text: etiket) | timer (minutes) | reminder (text, date: 'YYYY-MM-DD HH:MM' opsiyonel) | "
+         "calendar (title, date: 'YYYY-MM-DD HH:MM', minutes: süre) | music (query: şarkı/sanatçı) | "
+         "media (value: 0=durdur,1=çal,2=sonraki,3=önceki) | flashlight (on) | brightness (value 0-100) | "
+         "volume (value 0-100) | focus (on: rahatsız etme) | low_power (on) | wifi (on) | bluetooth (on) | "
+         "navigate (query: adres/yer) | note (title, text) | clipboard (text) | shortcut (name: başka kısayol).",
+         _obj({"action": {"type": "string", "enum": [
+             "open_app", "open_url", "call", "message", "alarm", "timer", "reminder", "calendar",
+             "music", "media", "flashlight", "brightness", "volume", "focus", "low_power", "wifi",
+             "bluetooth", "navigate", "note", "clipboard", "shortcut"]},
+               "name": S, "url": S, "number": S, "text": S, "time": S, "date": S, "title": S,
+               "query": S, "minutes": I, "value": I, "on": {"type": "boolean"}},
+              ["action"]),
+         None),  # agent.Session bu aracı kendisi işler (kuyruğa alır)
 ]
 
 TOOL_MAP = {t.name: t for t in TOOLS}

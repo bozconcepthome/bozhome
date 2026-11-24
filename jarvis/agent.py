@@ -42,7 +42,11 @@ Oturum başlangıcı: {time.strftime('%Y-%m-%d %H:%M, %A')}.
 
 Kullanıcının bilgisayarı üzerinde gerçek araçların var: kabuk komutları, dosyalar, uygulama \
 açma, ekran görüntüsü + fare/klavye kontrolü, sistem durumu, pano, ADB ile Android telefon \
-kontrolü, web araması ve web sayfası okuma, ayrıca kalıcı hafıza.
+kontrolü, iphone aracıyla kullanıcının iPhone'unda eylemler (alarm, arama, mesaj, müzik, el \
+feneri, uygulama açma, hatırlatıcı, yol tarifi...), web araması ve web sayfası okuma, ayrıca \
+kalıcı hafıza. Kullanıcının bilgisayarı Mac ise ve iPhone ekranındaki bir şey gerekiyorsa \
+"iPhone Mirroring" uygulamasını open_target ile açıp screenshot + computer_control ile iPhone'u \
+doğrudan kullanabilirsin.
 
 Nasıl çalışırsın:
 - İstekleri gerçekten yap; sadece nasıl yapılacağını anlatma. Gerekirse birden çok aracı \
@@ -62,7 +66,7 @@ Kullanıcı hakkında hatırladıkların:
 class Session:
     """Tek bir konuşma; geçmişi ve araç döngüsünü tutar."""
 
-    def __init__(self, emit: Emit, approve: Approve) -> None:
+    def __init__(self, emit: Emit, approve: Approve, effort: str | None = None) -> None:
         self.client = anthropic.AsyncAnthropic()
         self.emit = emit
         self.approve = approve
@@ -70,6 +74,8 @@ class Session:
         self.system = system_prompt()
         self.tool_specs = [t.spec() for t in tools.TOOLS] + SERVER_TOOLS
         self.id = uuid.uuid4().hex[:8]
+        self.effort = effort or EFFORT
+        self.iphone_actions: list[dict[str, Any]] = []
 
     def reset(self) -> None:
         self.messages.clear()
@@ -160,6 +166,9 @@ class Session:
             await self.emit({"type": "notice", "level": "error", "text": "Claude'a bağlanılamadı (internet?)."})
         finally:
             self._repair()
+            if self.iphone_actions:
+                await self.emit({"type": "iphone_actions", "actions": self.iphone_actions})
+                self.iphone_actions = []
             await self.emit({"type": "done"})
 
     async def _stream_turn(self):
@@ -170,7 +179,7 @@ class Session:
             messages=self.messages,
             tools=self.tool_specs,
             thinking={"type": "adaptive", "display": "summarized"},
-            output_config={"effort": EFFORT},
+            output_config={"effort": self.effort},
             cache_control={"type": "ephemeral"},
             betas=["server-side-fallback-2026-07-01"],
             fallbacks="default",
@@ -215,6 +224,16 @@ class Session:
                     "content": json.dumps({"INVALID_JSON": err, "input": args}, ensure_ascii=False)}
 
         await self.emit({"type": "tool_start", "id": tid, "name": name, "input": args})
+        if name == "iphone":
+            action, problem = iphone_action(args)
+            if problem:
+                await self.emit({"type": "tool_end", "id": tid, "name": name, "ok": False, "preview": problem})
+                return {"type": "tool_result", "tool_use_id": tid, "is_error": True, "content": problem}
+            self.iphone_actions.append(action)
+            await self.emit({"type": "tool_end", "id": tid, "name": name, "ok": True,
+                             "preview": "iPhone kuyruğuna eklendi"})
+            return {"type": "tool_result", "tool_use_id": tid,
+                    "content": "Sıraya alındı; yanıtın sonunda iPhone'da çalıştırılacak."}
         if tools.needs_approval(name, args) and not await self.approve(name, args):
             await self.emit({"type": "tool_end", "id": tid, "name": name, "ok": False,
                              "preview": "Kullanıcı reddetti"})
@@ -251,3 +270,53 @@ def _server_result_preview(cb: Any) -> str:
     if content is not None and getattr(content, "error_code", None):
         return f"hata: {content.error_code}"
     return "tamam"
+
+
+# iPhone uygulamalarının URL şemaları: kısayolun tek bir "URL'leri Aç" bloğuyla açabilmesi için
+APP_SCHEMES = {
+    "whatsapp": "whatsapp://", "instagram": "instagram://", "spotify": "spotify://",
+    "youtube": "youtube://", "telegram": "tg://", "twitter": "twitter://", "x": "twitter://",
+    "facebook": "fb://", "tiktok": "snssdk1233://", "netflix": "nflx://", "gmail": "googlegmail://",
+    "google maps": "comgooglemaps://", "haritalar": "maps://", "maps": "maps://",
+    "müzik": "music://", "music": "music://", "apple music": "music://", "ayarlar": "App-prefs:",
+    "settings": "App-prefs:", "mail": "message://", "posta": "message://", "takvim": "calshow://",
+    "calendar": "calshow://", "notlar": "mobilenotes://", "notes": "mobilenotes://",
+    "fotoğraflar": "photos-redirect://", "photos": "photos-redirect://", "safari": "x-web-search://",
+    "mesajlar": "sms:", "messages": "sms:", "telefon": "tel:", "phone": "tel:",
+    "podcasts": "podcasts://", "linkedin": "linkedin://", "snapchat": "snapchat://",
+    "discord": "discord://", "trendyol": "trendyol://", "getir": "getir://", "uber": "uber://",
+    "saat": "clock-alarm://", "clock": "clock-alarm://", "chatgpt": "chatgpt://", "claude": "claude://",
+}
+
+
+def iphone_action(args: dict[str, Any]) -> tuple[dict[str, Any], str | None]:
+    """Eylemi kısayolun anlayacağı sade biçime getir. (eylem, hata) döner."""
+    from urllib.parse import quote
+    a = {k: v for k, v in args.items() if v not in (None, "")}
+    act = a.get("action")
+    if act == "open_app":
+        key = str(a.get("name", "")).lower().strip()
+        scheme = APP_SCHEMES.get(key)
+        if not scheme:
+            return a, (f"'{a.get('name')}' için bilinen bir açılış adresi yok. Biliyorsan open_url ile "
+                       "uygulamanın URL şemasını kullan ya da kullanıcıya bunu bir kısayola eklemesini öner.")
+        return {"action": "open_url", "url": scheme, "label": a.get("name")}, None
+    if act in ("call", "message") and not any(ch.isdigit() for ch in str(a.get("number", ""))):
+        return a, ("Telefon numarası gerekli. Hafızada (recall) bu kişinin numarası yoksa kullanıcıdan "
+                   "iste ve remember ile kaydet.")
+    if act == "call":
+        num = str(a.get("number", "")).replace(" ", "")
+        return {"action": "open_url", "url": f"tel:{quote(num)}", "label": f"Ara: {a.get('number')}"}, None
+    if act == "message":
+        num = str(a.get("number", "")).replace(" ", "")
+        return {"action": "open_url", "url": f"sms:{quote(num)}&body={quote(str(a.get('text', '')))}",
+                "label": f"Mesaj: {a.get('number')}"}, None
+    if act == "navigate":
+        return {"action": "open_url", "url": f"maps://?daddr={quote(str(a.get('query', '')))}",
+                "label": f"Yol tarifi: {a.get('query')}"}, None
+    if act == "music" and a.get("query"):
+        return {"action": "open_url", "url": f"music://music.apple.com/search?term={quote(str(a['query']))}",
+                "label": f"Müzik: {a['query']}"}, None
+    if "on" in a:  # kısayolda "Eğer on = 1" karşılaştırması kolay olsun diye metin
+        a["on"] = "1" if a["on"] else "0"
+    return a, None

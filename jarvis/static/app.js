@@ -422,6 +422,7 @@
       case "tool_prepare": actStart(ev.id, ev.name, {}); setState("working"); break;
       case "tool_start": actStart(ev.id, ev.name, ev.input); if (!ttsBusy) setState("working"); break;
       case "tool_end": actEnd(ev.id, ev.name, ev.ok, ev.preview); break;
+      case "iphone_actions": iphoneCard(ev.actions); break;
       case "image": { const v = $("#vision"); v.classList.remove("hidden"); v.querySelector("img").src = `data:image/png;base64,${ev.data}`; break; }
       case "approval": askApproval(ev); break;
       case "notice": bubble(`notice ${ev.level}`, esc(ev.text)); if (ev.level === "error") { setState("error"); setTimeout(() => S.state === "error" && setState("idle"), 2500); } break;
@@ -433,6 +434,23 @@
         if (!ttsBusy && !ttsQueue.length && S.state !== "error") afterSpeech();
         break;
     }
+  }
+
+  // ---------------------------------------------------------------- iPhone eylemleri
+  const IA = { open_app: "📱 Uygulama", open_url: "🔗 Bağlantı", call: "📞 Ara", message: "💬 Mesaj", alarm: "⏰ Alarm", timer: "⏱ Zamanlayıcı",
+    reminder: "✅ Hatırlatıcı", calendar: "📅 Takvim", music: "🎵 Müzik", media: "⏯ Medya", flashlight: "🔦 Fener", brightness: "☀ Parlaklık",
+    volume: "🔊 Ses", focus: "🌙 Odak", low_power: "🔋 Güç tasarrufu", wifi: "📶 Wi-Fi", bluetooth: "ᛒ Bluetooth", navigate: "🗺 Yol tarifi",
+    note: "📝 Not", clipboard: "📋 Pano", shortcut: "⚡ Kısayol" };
+  function iphoneCard(actions) {
+    const d = bubble("ai iphone");
+    const list = actions.map((a) => {
+      const detail = a.label || a.name || a.number || a.time || a.query || a.title || a.url || a.text || (a.minutes != null ? `${a.minutes} dk` : "") || (a.value != null ? a.value : "") || (a.on != null ? (a.on ? "aç" : "kapat") : "");
+      return `<li>${IA[a.action] || a.action} <small>${esc(String(detail))}</small></li>`;
+    }).join("");
+    const url = `shortcuts://run-shortcut?name=${encodeURIComponent("JARVIS Eylem")}&input=text&text=${encodeURIComponent(JSON.stringify({ actions }))}`;
+    d.innerHTML = `<b class="ia-title">iPhone eylemleri</b><ul class="ia-list">${list}</ul><a class="btn primary ia-run" href="${url}">▶ iPhone'da çalıştır</a>` +
+      (IOS ? "" : `<small class="ia-hint">Bu düğme iPhone'dan açıldığında çalışır. Ya da iPhone'da "Hey Siri, Jarvis" de.</small>`);
+    shock("126,249,255");
   }
 
   // ---------------------------------------------------------------- onay
@@ -464,6 +482,7 @@
   $("#composer").addEventListener("submit", (e) => { e.preventDefault(); submit(); });
   $("#btn-stop").onclick = () => { send({ type: "stop" }); stopSpeech(); };
   $("#btn-mic").onclick = () => { audioCtx(); recActive ? stopRecognition() : startRecognition(false); };
+  $("#btn-iphone").onclick = () => { location.href = `/iphone?token=${encodeURIComponent(TOKEN)}`; };
   $("#btn-reset").onclick = () => { stopSpeech(); send({ type: "reset" }); };
   const vbtn = $("#btn-voice");
   vbtn.classList.toggle("on", S.voice);

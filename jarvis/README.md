@@ -18,6 +18,7 @@ Bilgisayarını ve Android telefonunu sesle ya da yazıyla yöneten, animasyonlu
 | Pano okuma/yazma | `clipboard` | — |
 | **Kalıcı hafıza** (seni tanır, tercihlerini hatırlar) | `remember`, `recall`, `forget` | silme ✅ |
 | **Android telefon**: ekran, dokunma, kaydırma, yazma, uygulama açma, bildirimler, pil, arama, SMS | `phone` (ADB) | okuma dışındakiler ✅ |
+| **iPhone**: alarm, zamanlayıcı, arama, SMS, el feneri, müzik, parlaklık, ses, odak, Wi-Fi, hatırlatıcı, not, yol tarifi, uygulama açma | `iphone` (Kısayollar + Siri) | — |
 | İnternette arama ve sayfa okuma (haber, hava, kur…) | `web_search`, `web_fetch` | — |
 | Görsel anlama (fotoğraf yükle → yorumlasın) | arayüzdeki ⊕ | — |
 
@@ -77,6 +78,23 @@ JARVIS'in beyni bilgisayarında çalışır; iPhone ona ana ekrandaki bir uygula
 - Bilgisayar kapalıyken veya uykudayken JARVIS cevap veremez. Bilgisayarın uykuya geçmemesini ayarla.
 - iPhone'dan ne isteyebilirsin: "bilgisayarımda Spotify'ı aç", "masaüstümde ne var?", "ekranıma bak", "yarın hava nasıl?", "bunu hatırla: …"
 
+## iPhone'u yönetme ("Hey Siri, Jarvis")
+
+Apple, iPhone'un dışarıdan (ADB gibi) kontrol edilmesine izin vermiyor. Resmî ve güvenli yol **Kısayollar** uygulaması. JARVIS iki kısayolla çalışır:
+
+- **Jarvis** (Siri ile çağrılır): Söylediğini dikte eder ve JARVIS'e (`/api/siri`) gönderir. Cevabı sesli okur, sonra eylemleri çalıştırır.
+- **JARVIS Eylem**: JARVIS'in istediği eylemleri telefonda yapar (alarm kurma, fener açma, arama vb.).
+
+**Kurulum:** iPhone'da JARVIS'i aç → üstteki **📱 iPHONE** düğmesi (ya da `/iphone?token=...` sayfası). Sayfa sunucu adresini kopyalanmaya hazır gösterir ve iki kısayolu adım adım kurdurur.
+
+Kullanım: **"Hey Siri, Jarvis"** → *"yarın 7'de alarm kur"*, *"feneri aç"*, *"annemi ara"*, *"bilgisayarımın diski ne kadar dolu?"*. Ayarlar → Erişilebilirlik → Dokunma → **Arkaya Dokunma**'ya ya da **Eylem Düğmesi**'ne atarsan telefonun arkasına iki kez vurmak yeter.
+
+Bilinmesi gerekenler:
+- Arama ve SMS için JARVIS'in numarayı bilmesi gerekir. Bir kez söylersen hafızasına kaydeder ("annemin numarası 0555…"). iOS mesajı göndermeden önce son onayı sana bırakır.
+- Siri üzerinden gelen isteklerde bilgisayardaki riskli işlemler (komut, dosya yazma) onay penceresi gösterilemediği için reddedilir. `JARVIS_AUTO_APPROVE=1` bunu değiştirir.
+- Siri isteklerinde hız için `JARVIS_SIRI_EFFORT` (varsayılan `medium`) kullanılır.
+- **Mac'in varsa:** macOS 15'teki *iPhone Yansıtma* açıkken JARVIS iPhone ekranını görüp tıklayabilir. Bu, Kısayollar'ın yapamadığı her şeyi kapsar.
+
 ## Telefondan kullanma (aynı Wi-Fi, Android)
 
 ### 1) Telefondan JARVIS ile konuşmak
@@ -95,7 +113,7 @@ Telefon tarayıcıları **mikrofonu yalnızca HTTPS'te** açar. Sesli kullanım 
 3. USB ile bağla veya kablosuz için `adb pair` / `adb connect IP:PORT` kullan, `adb devices` ile kontrol et.
 4. Örnek istekler: "telefonumun şarjı kaç?", "telefonda WhatsApp'ı aç", "son bildirimlerimi oku", "telefon ekranına bak, ne açık?"
 
-> iPhone'u Apple dışarıdan kontrol etmeye izin vermiyor. iPhone'dan JARVIS'e sadece web arayüzüyle bağlanabilirsin (1. yöntem).
+> iPhone için aşağıdaki *iPhone'u yönetme* bölümüne bak.
 
 ## Ayarlar (`.env`)
 
@@ -107,6 +125,7 @@ Telefon tarayıcıları **mikrofonu yalnızca HTTPS'te** açar. Sesli kullanım 
 | `JARVIS_EFFORT` | `low` … `max`. Yükseldikçe daha akıllı ama daha yavaş ve pahalı (varsayılan `high`) |
 | `JARVIS_TOKEN` | Sabit erişim anahtarı. Boş bırakırsan her açılışta yenisi üretilir |
 | `JARVIS_AUTO_APPROVE` | `1` = riskli işlemlerde onay sorma |
+| `JARVIS_SIRI_EFFORT` | Siri isteklerinin düşünme seviyesi (varsayılan `medium`, daha hızlı cevap için) |
 | `ELEVENLABS_API_KEY` | Doldurursan tarayıcı sesi yerine gerçekçi ElevenLabs sesi kullanılır |
 
 Hafıza `~/.jarvis/memory.json` dosyasında tutulur.

@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#02070d">
+<title>JARVIS iPhone Kurulumu</title>
+<link rel="apple-touch-icon" href="/static/apple-touch-icon.png">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&family=Rajdhani:wght@400;500;600&family=JetBrains+Mono&display=swap" rel="stylesheet">
+<style>
+  :root { --bg:#02070d; --c:#29d8ff; --c2:#7ef9ff; --green:#4dffb0; --amber:#ffb547; --txt:#d7f3ff; --dim:#7aa3b8; --line:rgba(41,216,255,.28); }
+  * { box-sizing: border-box; }
+  body { margin:0; background: radial-gradient(ellipse at 50% 0%, #073049 0%, var(--bg) 60%) fixed; background-color: var(--bg); color: var(--txt);
+    font: 17px/1.5 "Rajdhani", system-ui, sans-serif; padding: max(20px, env(safe-area-inset-top)) 16px 60px; }
+  main { max-width: 640px; margin: 0 auto; }
+  h1 { font-family: Orbitron, sans-serif; letter-spacing: .25em; color: var(--c2); text-shadow: 0 0 18px var(--c); font-size: 22px; margin: 6px 0 4px; }
+  .sub { color: var(--dim); margin: 0 0 22px; }
+  .orb { width: 70px; height: 70px; border-radius: 50%; margin: 0 auto 12px; position: relative;
+    background: radial-gradient(circle, #fff 0, var(--c) 30%, transparent 70%); animation: pulse 2.4s ease-in-out infinite; }
+  .orb::before, .orb::after { content:""; position:absolute; inset:-10px; border-radius:50%; border:2px dashed var(--c); animation: spin 6s linear infinite; }
+  .orb::after { inset:-20px; border-style: solid; border-color: transparent var(--c2); animation-duration: 3s; animation-direction: reverse; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes pulse { 50% { transform: scale(.85); opacity: .75; } }
+  header { text-align: center; }
+  section { background: rgba(6,26,40,.6); border: 1px solid var(--line); padding: 16px; margin: 16px 0; animation: up .6s cubic-bezier(.2,.9,.2,1) both; }
+  section:nth-of-type(2) { animation-delay: .1s; } section:nth-of-type(3) { animation-delay: .2s; } section:nth-of-type(4) { animation-delay: .3s; }
+  @keyframes up { from { transform: translateY(20px); opacity: 0; } }
+  h2 { font-family: Orbitron, sans-serif; font-size: 13px; letter-spacing: .2em; color: var(--c2); margin: 0 0 10px; }
+  h2 span { color: var(--bg); background: var(--c); padding: 1px 7px; margin-right: 8px; }
+  ol { padding-left: 22px; margin: 6px 0; } li { margin: 7px 0; }
+  b { color: #fff; } em { color: var(--c2); font-style: normal; }
+  .en { color: var(--dim); font-size: 14px; }
+  code, .box { font-family: "JetBrains Mono", monospace; font-size: 13px; }
+  code { background: rgba(41,216,255,.12); padding: 1px 5px; color: var(--c2); word-break: break-all; }
+  .box { display:flex; gap:8px; align-items:center; background:#000a; border:1px solid var(--c); padding:10px; margin:8px 0; }
+  .box span { flex:1; word-break: break-all; color: var(--green); }
+  button { font: 600 14px Rajdhani, sans-serif; letter-spacing: .1em; background: var(--c); color: #00121c; border: 0; padding: 8px 12px; cursor: pointer; }
+  button.ok { background: var(--green); }
+  .tbl { width: 100%; border-collapse: collapse; font-size: 15px; margin-top: 8px; }
+  .tbl td { border-top: 1px solid var(--line); padding: 6px 4px; vertical-align: top; }
+  .tbl td:first-child { white-space: nowrap; color: var(--c2); font-family: "JetBrains Mono", monospace; font-size: 13px; }
+  .tip { border-left: 3px solid var(--amber); padding: 6px 10px; background: rgba(255,181,71,.08); margin: 10px 0; }
+  .warn { color: var(--amber); }
+  a { color: var(--c2); }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div class="orb"></div>
+    <h1>JARVIS × iPHONE</h1>
+    <p class="sub">"Hey Siri, Jarvis" deyip iPhone'unu yönet. Kurulum yaklaşık 10 dakika sürer ve bir kez yapılır.</p>
+  </header>
+
+  <section>
+    <h2><span>0</span>SUNUCU ADRESİN</h2>
+    <p>Bu adresi kopyala, 1. adımda gerekecek:</p>
+    <div class="box"><span id="api">—</span><button data-copy="api">KOPYALA</button></div>
+    <p id="nohttps" class="warn" hidden>⚠ Bu sayfa HTTPS değil. Siri kısayolu yalnızca aynı Wi-Fi'de çalışır. Her yerden çalışması için README'deki Tailscale adımlarını uygula.</p>
+  </section>
+
+  <section>
+    <h2><span>1</span>"JARVIS EYLEM" KISAYOLU</h2>
+    <p>Bu kısayol JARVIS'in istediği işleri telefonda yapar. <b>Kısayollar</b> uygulaması → <b>+</b> → adını <code>JARVIS Eylem</code> koy (tam bu şekilde).</p>
+    <ol>
+      <li><b>Girdiden Sözlüğü Al</b> <span class="en">(Get Dictionary from Input)</span>, girdi: <em>Kısayol Girdisi</em>.<br>
+        <span class="en">Kısayol ayrıntılarında (ⓘ) "Girdi al: Metin, Sözlük" açık olmalı; girdi yoksa "Devam Et" seçilsin.</span></li>
+      <li><b>Sözlük Değerini Al</b> <span class="en">(Get Dictionary Value)</span>: anahtar <code>actions</code>.</li>
+      <li><b>Her Biriyle Tekrarla</b> <span class="en">(Repeat with Each)</span>: <em>Sözlük Değeri</em>.</li>
+      <li>Tekrarın <b>içine</b>: <b>Sözlük Değerini Al</b>, anahtar <code>action</code>, sözlük: <em>Tekrarlanan Öğe</em>. Sonra <b>Değişken Ayarla</b> <span class="en">(Set Variable)</span>, adı <code>Eylem</code>.</li>
+      <li>Aşağıdaki tablodaki her satır için tekrarın içine bir <b>Eğer</b> <span class="en">(If)</span> bloğu ekle: <em>Eylem</em> → <b>şudur</b> → <code>open_url</code> … Bloğun içinde önce <b>Sözlük Değerini Al</b> (<em>Tekrarlanan Öğe</em>'den gerekli anahtar), sonra ilgili eylem.</li>
+    </ol>
+    <table class="tbl">
+      <tr><td>open_url ★</td><td>anahtar <code>url</code> → <b>URL'leri Aç</b> <span class="en">(Open URLs)</span>. <i>Arama, SMS, yol tarifi ve uygulama açmanın hepsi bu bloktan geçer.</i></td></tr>
+      <tr><td>alarm ★</td><td>anahtar <code>time</code> → <b>Alarm Oluştur</b> <span class="en">(Create Alarm)</span>, saat: <em>Sözlük Değeri</em></td></tr>
+      <tr><td>timer ★</td><td>anahtar <code>minutes</code> → <b>Zamanlayıcıyı Başlat</b> <span class="en">(Start Timer)</span>, dakika</td></tr>
+      <tr><td>reminder ★</td><td>anahtar <code>text</code> → <b>Hatırlatıcı Ekle</b> <span class="en">(Add New Reminder)</span></td></tr>
+      <tr><td>flashlight ★</td><td>anahtar <code>on</code> → <b>Eğer</b> değer <code>1</code> ise <b>El Fenerini Ayarla: Açık</b>, <b>Aksi Takdirde</b> Kapalı</td></tr>
+      <tr><td>media</td><td><b>Oynat/Duraklat</b> <span class="en">(Play/Pause)</span></td></tr>
+      <tr><td>brightness</td><td>anahtar <code>value</code> → <b>Hesapla</b> ÷ 100 → <b>Parlaklığı Ayarla</b></td></tr>
+      <tr><td>volume</td><td>anahtar <code>value</code> → <b>Hesapla</b> ÷ 100 → <b>Ses Düzeyini Ayarla</b></td></tr>
+      <tr><td>focus</td><td>anahtar <code>on</code> → Eğer <code>1</code>: <b>Odağı Ayarla</b> Rahatsız Etme Açık, değilse Kapalı</td></tr>
+      <tr><td>low_power</td><td>anahtar <code>on</code> → <b>Düşük Güç Modunu Ayarla</b> (Açık/Kapalı)</td></tr>
+      <tr><td>wifi / bluetooth</td><td>anahtar <code>on</code> → <b>Wi-Fi'yi Ayarla</b> / <b>Bluetooth'u Ayarla</b></td></tr>
+      <tr><td>clipboard</td><td>anahtar <code>text</code> → <b>Panoya Kopyala</b></td></tr>
+      <tr><td>note</td><td>anahtar <code>text</code> → <b>Not Oluştur</b> <span class="en">(Create Note)</span></td></tr>
+      <tr><td>calendar</td><td>anahtarlar <code>title</code>, <code>date</code> → <b>Yeni Etkinlik Ekle</b></td></tr>
+    </table>
+    <div class="tip">★ olanlarla başla, diğerlerini sonra ekleyebilirsin. JARVIS eklemediğin bir eylemi isterse kısayol onu sessizce atlar.</div>
+  </section>
+
+  <section>
+    <h2><span>2</span>"JARVIS" SİRİ KISAYOLU</h2>
+    <p>Yeni kısayol oluştur, adı <code>Jarvis</code> olsun. Siri onu bu adla çağırır.</p>
+    <ol>
+      <li><b>Metni Dikte Et</b> <span class="en">(Dictate Text)</span>: dil Türkçe, dinlemeyi durdur: <em>Duraklamadan Sonra</em>.</li>
+      <li><b>Pil Düzeyini Al</b> <span class="en">(Get Battery Level)</span>.</li>
+      <li><b>URL'nin İçeriğini Al</b> <span class="en">(Get Contents of URL)</span>: URL olarak 0. adımdaki adresi yapıştır. <b>Yöntem: POST</b>, <b>İstek Gövdesi: JSON</b>, iki alan ekle:<br>
+        <code>text</code> (Metin) → <em>Dikte Edilen Metin</em><br>
+        <code>battery</code> (Metin) → <em>Pil Düzeyi</em></li>
+      <li><b>Sözlük Değerini Al</b>: anahtar <code>speech</code>, sözlük: <em>URL'nin İçerikleri</em>.</li>
+      <li><b>Metni Seslendir</b> <span class="en">(Speak Text)</span>: <em>Sözlük Değeri</em>.</li>
+      <li><b>Kısayolu Çalıştır</b> <span class="en">(Run Shortcut)</span>: <em>JARVIS Eylem</em>, girdi: <em>URL'nin İçerikleri</em>.</li>
+    </ol>
+    <p>İlk çalıştırmada "sunucuya bağlanmasına izin ver" sorusu gelirse <b>Her Zaman İzin Ver</b>'e dokun.</p>
+  </section>
+
+  <section>
+    <h2><span>3</span>KULLAN</h2>
+    <ol>
+      <li><b>"Hey Siri, Jarvis"</b> de, bip sesinden sonra isteğini söyle.</li>
+      <li><b>Daha hızlı:</b> Ayarlar → Erişilebilirlik → Dokunma → <b>Arkaya Dokunma</b> → İki Kez Dokunma → <em>Jarvis</em>. Telefonun arkasına iki kez vurman yeter. iPhone 15 Pro ve sonrasında <b>Eylem Düğmesi</b>ne de atayabilirsin.</li>
+      <li>Örnekler: <em>"yarın 7'de alarm kur"</em>, <em>"feneri aç"</em>, <em>"annemi ara"</em>, <em>"10 dakikalık zamanlayıcı"</em>, <em>"Kadıköy'e yol tarifi"</em>, <em>"WhatsApp'ı aç"</em>, <em>"süt almayı hatırlat"</em>, <em>"bilgisayarımda Spotify'ı aç"</em>, <em>"bilgisayarımın diski ne kadar dolu?"</em></li>
+    </ol>
+    <div class="tip">Web arayüzünde JARVIS iPhone eylemi hazırladığında yeşil <b>▶ iPhone'da çalıştır</b> düğmesi çıkar; aynı "JARVIS Eylem" kısayolunu çalıştırır.</div>
+    <p class="en">Mac kullanıyorsan: macOS 15'teki <b>iPhone Yansıtma</b> uygulaması açıkken JARVIS iPhone ekranını görüp doğrudan tıklayabilir. "iPhone yansıtmayı aç ve Instagram'da son bildirimime bak" gibi isteklerde bulunabilirsin.</p>
+  </section>
+  <p style="text-align:center"><a href="/">← JARVIS'e dön</a></p>
+</main>
+<script>
+  let token = "";
+  try { token = new URLSearchParams(location.search).get("token") || JSON.parse(localStorage.getItem("jarvis_token") || '""'); } catch { /* */ }
+  document.getElementById("api").textContent = `${location.origin}/api/siri?token=${encodeURIComponent(token || "TOKEN")}`;
+  document.getElementById("nohttps").hidden = location.protocol === "https:" || location.hostname === "localhost";
+  document.querySelectorAll("[data-copy]").forEach((b) => b.onclick = async () => {
+    const t = document.getElementById(b.dataset.copy).textContent;
+    try { await navigator.clipboard.writeText(t); } catch {
+      const r = document.createRange(); r.selectNodeContents(document.getElementById(b.dataset.copy)); getSelection().removeAllRanges(); getSelection().addRange(r); document.execCommand("copy");
+    }
+    b.textContent = "KOPYALANDI ✓"; b.classList.add("ok"); setTimeout(() => { b.textContent = "KOPYALA"; b.classList.remove("ok"); }, 1800);
+  });
+</script>
+</body>
+</html>

@@ -96,6 +96,63 @@ async def tts(request: Request, token: str = "") -> Response:
     return Response(r.content, media_type="audio/mpeg")
 
 
+SIRI_EFFORT = os.environ.get("JARVIS_SIRI_EFFORT", "medium")
+_siri: dict[str, Any] = {"session": None, "last": 0.0, "lock": asyncio.Lock()}
+
+
+@app.post("/api/siri")
+async def siri(request: Request, token: str = "") -> dict[str, Any]:
+    """iPhone 'Jarvis' kısayolu buraya istek atar; cevap metni + iPhone eylemleri döner."""
+    check(token)
+    body = await request.json()
+    text = str(body.get("text", "")).strip()
+    if not text:
+        return {"speech": "Seni duyamadım.", "actions": []}
+
+    async with _siri["lock"]:
+        out: dict[str, Any] = {"speech": "", "actions": [], "notices": []}
+
+        async def emit(ev: dict[str, Any]) -> None:
+            if ev["type"] == "text":
+                out["speech"] += ev["text"]
+            elif ev["type"] == "text_end":
+                out["speech"] += "\n"
+            elif ev["type"] == "iphone_actions":
+                out["actions"] = ev["actions"]
+            elif ev["type"] == "notice":
+                out["notices"].append(ev["text"])
+
+        async def approve(name: str, args: dict[str, Any]) -> bool:
+            return AUTO_APPROVE  # Siri'de onay penceresi yok
+
+        loop_time = asyncio.get_running_loop().time()
+        sess = _siri["session"]
+        if sess is None or loop_time - _siri["last"] > 600 or text.lower() in ("yeni konuşma", "sıfırla"):
+            sess = _siri["session"] = agent.Session(emit, approve, effort=SIRI_EFFORT)
+        sess.emit, sess.approve = emit, approve
+        _siri["last"] = loop_time
+
+        info = []
+        if body.get("battery") not in (None, ""):
+            info.append(f"pil %{body['battery']}")
+        if str(body.get("charging", "")).lower() in ("1", "true", "evet", "yes"):
+            info.append("şarjda")
+        note = (f"[iPhone'dan Siri ile söylendi{'; ' + ', '.join(info) if info else ''}. Cevabın sesli "
+                "okunacak: 1-2 kısa cümle, liste ya da kod yok. Onay gerektiren bilgisayar işlemleri "
+                f"burada {'otomatik onaylı' if AUTO_APPROVE else 'reddedilir; kullanıcıya bilgisayardaki arayüzü kullanmasını söyle'}.]\n")
+        try:
+            await asyncio.wait_for(sess.send(note + text), timeout=110)
+        except asyncio.TimeoutError:
+            out["speech"] += " Bu biraz uzun sürüyor, bilgisayardaki ekrandan takip edebilirsin."
+        speech = " ".join(out["speech"].split()) or " ".join(out["notices"]) or "Tamamdır."
+        return {"speech": speech, "actions": out["actions"], "has_actions": bool(out["actions"])}
+
+
+@app.get("/iphone")
+async def iphone_page() -> FileResponse:
+    return FileResponse(HERE / "static" / "iphone.html")
+
+
 @app.websocket("/ws")
 async def ws(socket_: WebSocket) -> None:
     if not secrets.compare_digest(socket_.query_params.get("token", ""), TOKEN):
