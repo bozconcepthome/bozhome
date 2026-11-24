@@ -10,7 +10,11 @@
   // ---------------------------------------------------------------- token
   const params = new URLSearchParams(location.search);
   let TOKEN = params.get("token") || store.get("jarvis_token", "");
-  if (params.get("token")) { store.set("jarvis_token", TOKEN); history.replaceState(null, "", location.pathname); }
+  // Token adreste kalır: iPhone'da "Ana Ekrana Ekle" ile açılan uygulama Safari'nin
+  // depolamasını göremez, token'ı simgenin adresinden okur.
+  if (params.get("token")) store.set("jarvis_token", TOKEN);
+  else if (TOKEN) history.replaceState(null, "", `${location.pathname}?token=${encodeURIComponent(TOKEN)}`);
+  const IOS = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
 
   // ---------------------------------------------------------------- durum
   const S = {
@@ -304,7 +308,7 @@
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   let rec = null, recActive = false, wakeMode = false;
   function startRecognition(wake = false) {
-    if (!SR) { toast("Bu tarayıcı sesli girişi desteklemiyor (Chrome/Edge dene)"); return; }
+    if (!SR) { toast(IOS ? "Sesli giriş için klavyedeki 🎤 dikte tuşunu kullan" : "Bu tarayıcı sesli girişi desteklemiyor (Chrome/Edge dene)"); $("#input").focus(); return; }
     if (recActive) return;
     stopSpeech();
     wakeMode = wake;
@@ -535,5 +539,12 @@
   requestAnimationFrame(frame);
   setInterval(tickClock, 1000); tickClock();
   if ("speechSynthesis" in window) speechSynthesis.getVoices();
+  // iOS sesi yalnızca bir dokunuşla açar: ilk dokunuşta ses motorlarını uyandır.
+  const unlock = () => {
+    try { audioCtx(); } catch { /* */ }
+    if ("speechSynthesis" in window) { const u = new SpeechSynthesisUtterance(" "); u.volume = 0; speechSynthesis.speak(u); }
+    removeEventListener("touchend", unlock); removeEventListener("click", unlock);
+  };
+  addEventListener("touchend", unlock, { passive: true }); addEventListener("click", unlock);
   boot().then(() => { connect(); pollStatus(); });
 })();

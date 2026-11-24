@@ -55,7 +55,29 @@ python server.py
 
 > **macOS:** Ekran görüntüsü ve fare kontrolü için Sistem Ayarları → Gizlilik ve Güvenlik → *Ekran Kaydı* ve *Erişilebilirlik* altında Terminal'e izin ver.
 
-## Telefondan kullanma
+## iPhone'a kurulum (uygulama gibi)
+
+JARVIS'in beyni bilgisayarında çalışır; iPhone ona ana ekrandaki bir uygulama simgesiyle bağlanır. Mikrofonun çalışması için bağlantının HTTPS olması gerekir. En kolay yol **Tailscale** (ücretsiz). Ev dışındayken, mobil veriyle bile çalışır.
+
+1. **Bilgisayarda:** JARVIS'i kur (yukarıdaki *Kurulum*). `.env` içine sabit bir `JARVIS_TOKEN=uzun-gizli-bir-kelime` yaz ki adres hep aynı kalsın.
+2. **Tailscale:** https://tailscale.com/download adresinden bilgisayara, App Store'dan iPhone'a kur. İkisinde de aynı hesapla giriş yap.
+3. Tailscale yönetim panelinde (login.tailscale.com → *DNS*) **MagicDNS** ve **HTTPS Certificates** seçeneklerini aç.
+4. **Bilgisayarda** iki terminal aç:
+   ```bash
+   python server.py                 # 1. terminal: JARVIS
+   tailscale serve --bg 8765        # 2. terminal: HTTPS adresi verir
+   ```
+   `tailscale serve` sana `https://bilgisayarin-adi.xxxx.ts.net` gibi bir adres verir.
+5. **iPhone'da Safari** ile `https://bilgisayarin-adi.xxxx.ts.net/?token=JARVIS_TOKEN` adresini aç.
+6. Paylaş düğmesine (□↑) dokun → **Ana Ekrana Ekle** → Ekle. Artık ana ekranda JARVIS simgesi var ve tam ekran açılıyor.
+7. İlk açılışta ekrana bir kez dokun, sesli yanıt böylece açılır. Mikrofon izni sorulursa **İzin Ver**'e bas.
+
+İpuçları:
+- 🎙 düğmesi çalışmazsa klavyedeki 🎤 dikte tuşuyla konuş. Bazı iOS sürümleri ana ekran uygulamalarında sesli girişi kısıtlıyor.
+- Bilgisayar kapalıyken veya uykudayken JARVIS cevap veremez. Bilgisayarın uykuya geçmemesini ayarla.
+- iPhone'dan ne isteyebilirsin: "bilgisayarımda Spotify'ı aç", "masaüstümde ne var?", "ekranıma bak", "yarın hava nasıl?", "bunu hatırla: …"
+
+## Telefondan kullanma (aynı Wi-Fi, Android)
 
 ### 1) Telefondan JARVIS ile konuşmak
 ```bash
