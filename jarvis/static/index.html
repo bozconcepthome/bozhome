@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#02070d">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>JARVIS</title>
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" href="/static/icon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Rajdhani:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="booting">
+  <canvas id="bg"></canvas>
+  <div class="scanlines"></div>
+  <div class="vignette"></div>
+
+  <!-- Açılış sekansı -->
+  <div id="boot">
+    <div class="boot-ring"></div>
+    <pre id="boot-log"></pre>
+    <div class="boot-bar"><span></span></div>
+  </div>
+
+  <header class="topbar">
+    <div class="brand"><span class="logo-dot"></span><span id="brand-name">JARVIS</span><small id="model-tag">—</small></div>
+    <div class="clock"><span id="clock-time">--:--:--</span><small id="clock-date"></small></div>
+    <div class="top-actions">
+      <button id="btn-voice" class="chip" title="Sesli yanıt">🔊 SES</button>
+      <button id="btn-wake" class="chip" title="'Jarvis' uyandırma kelimesi">👂 UYANDIRMA</button>
+      <button id="btn-reset" class="chip" title="Yeni konuşma">⟲ YENİ</button>
+    </div>
+  </header>
+
+  <main class="hud">
+    <!-- Sol panel: sistem -->
+    <aside class="panel left" id="panel-sys">
+      <h3><i></i>SİSTEM</h3>
+      <div class="gauges">
+        <div class="gauge" data-key="cpu"><svg viewBox="0 0 100 100"><circle class="track" cx="50" cy="50" r="42"/><circle class="val" cx="50" cy="50" r="42"/></svg><b>0%</b><span>CPU</span></div>
+        <div class="gauge" data-key="ram"><svg viewBox="0 0 100 100"><circle class="track" cx="50" cy="50" r="42"/><circle class="val" cx="50" cy="50" r="42"/></svg><b>0%</b><span>RAM</span></div>
+        <div class="gauge" data-key="disk"><svg viewBox="0 0 100 100"><circle class="track" cx="50" cy="50" r="42"/><circle class="val" cx="50" cy="50" r="42"/></svg><b>0%</b><span>DİSK</span></div>
+        <div class="gauge" data-key="battery"><svg viewBox="0 0 100 100"><circle class="track" cx="50" cy="50" r="42"/><circle class="val" cx="50" cy="50" r="42"/></svg><b>—</b><span>PİL</span></div>
+      </div>
+      <dl class="sysinfo">
+        <dt>HOST</dt><dd id="si-host">—</dd>
+        <dt>OS</dt><dd id="si-os">—</dd>
+        <dt>UPTIME</dt><dd id="si-up">—</dd>
+        <dt>HAFIZA</dt><dd id="si-mem">—</dd>
+      </dl>
+      <div class="spark"><canvas id="spark"></canvas><small>CPU / 60 sn</small></div>
+    </aside>
+
+    <!-- Merkez: reaktör -->
+    <section class="core">
+      <canvas id="reactor"></canvas>
+      <div class="core-label"><span id="state-text">ÇEVRİMDIŞI</span></div>
+      <div id="thinking-line" class="thinking-line"></div>
+    </section>
+
+    <!-- Sağ panel: aktivite -->
+    <aside class="panel right" id="panel-act">
+      <h3><i></i>AKTİVİTE</h3>
+      <ul id="activity"></ul>
+      <div id="vision" class="vision hidden"><img alt="ekran"><small>SON GÖRÜNTÜ</small></div>
+    </aside>
+  </main>
+
+  <!-- Konuşma -->
+  <section class="chat">
+    <div id="transcript"></div>
+    <form id="composer" autocomplete="off">
+      <label class="attach" title="Görsel ekle">⊕<input type="file" id="file" accept="image/*" multiple hidden></label>
+      <div id="previews"></div>
+      <input id="input" placeholder="Bir şey söyle ya da yaz…" enterkeyhint="send">
+      <button type="button" id="btn-mic" class="mic" title="Konuş"><span></span>🎙</button>
+      <button type="submit" id="btn-send" class="send" title="Gönder">➤</button>
+      <button type="button" id="btn-stop" class="stop hidden" title="Durdur">■</button>
+    </form>
+  </section>
+
+  <!-- Onay penceresi -->
+  <div id="approval" class="modal hidden">
+    <div class="modal-card">
+      <div class="warn-icon">⚠</div>
+      <h2>Yetki isteniyor</h2>
+      <p id="ap-desc"></p>
+      <pre id="ap-detail"></pre>
+      <div class="modal-actions">
+        <button id="ap-no" class="btn ghost">Reddet</button>
+        <button id="ap-yes" class="btn primary">İzin ver</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+  <script src="/static/app.js"></script>
+</body>
+</html>
