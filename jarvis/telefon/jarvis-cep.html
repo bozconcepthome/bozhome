@@ -1,0 +1,591 @@
+<title>JARVIS Cep</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800&family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  /* Layout: tek ekran, dikey yığın — üst bar / reaktör / konuşma / giriş. Tek bir koyu HUD görünümü (bilinçli tek tema). */
+  :root {
+    --bg: #02080e; --panel: rgba(7, 28, 42, .72); --line: rgba(41, 216, 255, .3);
+    --c: #29d8ff; --c2: #8af6ff; --green: #4dffb0; --amber: #ffb547; --red: #ff5a76;
+    --txt: #d6f4ff; --dim: #7ea6ba;
+    --hud: "Orbitron", "Rajdhani", system-ui, sans-serif;
+    --body: "Rajdhani", system-ui, -apple-system, sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+    color-scheme: dark;
+  }
+  html, body { height: 100%; }
+  body {
+    background: radial-gradient(ellipse at 50% 30%, #07283d 0%, var(--bg) 62%) var(--bg);
+    background-color: var(--bg); color: var(--txt); font: 17px/1.45 var(--body);
+    overflow: hidden; -webkit-tap-highlight-color: transparent;
+  }
+  button, input { font: inherit; color: inherit; }
+  button { cursor: pointer; }
+  .app { position: relative; z-index: 2; height: 100%; display: flex; flex-direction: column;
+    padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 8px 10px; gap: 8px; }
+  #bg { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; }
+  .scan { position: fixed; inset: 0; z-index: 1; pointer-events: none;
+    background: repeating-linear-gradient(to bottom, rgba(255,255,255,.022) 0 1px, transparent 1px 3px); }
+
+  header { display: flex; align-items: center; justify-content: space-between; gap: 10px; animation: drop .9s cubic-bezier(.2,.9,.2,1) both .2s; }
+  @keyframes drop { from { transform: translateY(-120%); opacity: 0; } }
+  .brand { display: flex; align-items: center; gap: 10px; font: 800 18px var(--hud); letter-spacing: .32em; color: var(--c2); text-shadow: 0 0 14px var(--c); }
+  .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--accent, var(--c)); box-shadow: 0 0 12px var(--accent, var(--c)); animation: pulse 1.6s infinite; }
+  @keyframes pulse { 50% { transform: scale(.55); opacity: .5; } }
+  .chips { display: flex; gap: 6px; }
+  .chip { border: 1px solid var(--line); background: rgba(0,0,0,.25); color: var(--dim); font: 600 12px var(--body); letter-spacing: .12em;
+    padding: 6px 9px; clip-path: polygon(7px 0, 100% 0, calc(100% - 7px) 100%, 0 100%); transition: .25s; }
+  .chip.on { background: var(--c); color: #00151f; border-color: var(--c); box-shadow: 0 0 14px rgba(41,216,255,.5); }
+  .chip:focus-visible, .icon:focus-visible, .send:focus-visible { outline: 2px solid var(--c2); outline-offset: 2px; }
+
+  .core { position: relative; flex: 1 1 auto; min-height: 150px; }
+  #reactor { position: absolute; inset: 0; width: 100%; height: 100%; animation: coreIn 1.3s cubic-bezier(.2,.9,.2,1) both; }
+  @keyframes coreIn { from { transform: scale(.2) rotate(-80deg); opacity: 0; filter: blur(8px); } }
+  .state { position: absolute; left: 0; right: 0; bottom: 4px; text-align: center; pointer-events: none; }
+  .state span { font: 600 11px var(--hud); letter-spacing: .5em; padding: 4px 12px 4px 18px; color: var(--accent, var(--c)); border: 1px solid var(--accent, var(--c)); background: rgba(0,0,0,.45); text-shadow: 0 0 8px var(--accent, var(--c)); }
+  .think { position: absolute; top: 4px; left: 0; right: 0; text-align: center; color: var(--amber); font-size: 14px; font-style: italic; opacity: 0; transition: opacity .4s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .think.show { opacity: .9; }
+
+  #log { flex: 0 1 auto; max-height: 44%; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding-top: 14px;
+    -webkit-mask-image: linear-gradient(to bottom, transparent, #000 18px); mask-image: linear-gradient(to bottom, transparent, #000 18px); scrollbar-width: none; }
+  .msg { max-width: 92%; padding: 8px 13px; white-space: pre-wrap; overflow-wrap: anywhere; animation: msgIn .45s cubic-bezier(.2,.9,.2,1) both; }
+  @keyframes msgIn { from { transform: translateY(12px) scale(.97); opacity: 0; filter: blur(3px); } }
+  .msg.me { align-self: flex-end; background: rgba(41,216,255,.13); border: 1px solid var(--line); border-right: 3px solid var(--c); }
+  .msg.ai { align-self: flex-start; background: rgba(2,12,20,.78); border: 1px solid var(--line); border-left: 3px solid var(--c2); }
+  .msg.ai.live::after { content: "▍"; color: var(--c); animation: blink .8s steps(2) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  .msg.note { align-self: center; font-size: 14px; color: var(--amber); border: 1px dashed var(--amber); padding: 4px 12px; }
+  .msg.note.err { color: var(--red); border-color: var(--red); }
+  .msg img { display: block; max-width: 150px; margin-bottom: 6px; border: 1px solid var(--line); }
+  .msg code { font: 13px var(--mono); background: rgba(41,216,255,.12); padding: 0 4px; }
+  .welcome { align-self: stretch; max-width: none; border-left-color: var(--green); }
+  .welcome b { color: var(--c2); }
+  .suggest { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .suggest button { border: 1px solid var(--line); background: rgba(41,216,255,.07); padding: 5px 10px; font-size: 15px; }
+
+  .acts { align-self: stretch; max-width: none; border-left: 3px solid var(--green); background: rgba(3,22,16,.82); border-top: 1px solid rgba(77,255,176,.3); border-right: 1px solid rgba(77,255,176,.3); border-bottom: 1px solid rgba(77,255,176,.3); white-space: normal; }
+  .acts h4 { margin: 0 0 6px; font: 600 11px var(--hud); letter-spacing: .25em; color: var(--green); }
+  .acts ul { list-style: none; margin: 0 0 10px; padding: 0; display: grid; gap: 6px; }
+  .acts li { display: flex; align-items: center; justify-content: space-between; gap: 8px; animation: msgIn .4s both; }
+  .acts li small { color: var(--dim); font-family: var(--mono); font-size: 12px; overflow-wrap: anywhere; }
+  .acts a.go { flex: none; text-decoration: none; border: 1px solid var(--green); color: var(--green); padding: 3px 10px; font-weight: 600; }
+  .run { display: block; width: 100%; text-align: center; text-decoration: none; background: var(--green); color: #002a16; font-weight: 700; letter-spacing: .1em; padding: 10px; box-shadow: 0 0 20px rgba(77,255,176,.35); }
+  .acts .hint { display: block; color: var(--dim); font-size: 13px; margin-top: 6px; }
+
+  form { display: flex; align-items: center; gap: 6px; padding: 5px; background: var(--panel); border: 1px solid var(--line); backdrop-filter: blur(10px);
+    clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px); animation: rise .9s cubic-bezier(.2,.9,.2,1) both .35s; }
+  @keyframes rise { from { transform: translateY(120%); opacity: 0; } }
+  form:focus-within { border-color: var(--c); }
+  #q { flex: 1; min-width: 0; background: transparent; border: 0; outline: 0; font-size: 17px; padding: 9px 4px; }
+  #q::placeholder { color: var(--dim); }
+  .icon { width: 42px; height: 42px; flex: none; border: 1px solid var(--line); background: transparent; border-radius: 50%; display: grid; place-items: center; font-size: 18px; color: var(--c2); position: relative; }
+  .icon.live { border-color: var(--green); color: var(--green); }
+  .icon.live::after { content: ""; position: absolute; inset: -1px; border-radius: 50%; border: 2px solid var(--green); animation: ripple 1.3s infinite; }
+  @keyframes ripple { to { transform: scale(1.8); opacity: 0; } }
+  .send { width: 46px; height: 46px; flex: none; border-radius: 50%; border: 1px solid var(--c); background: rgba(41,216,255,.14); color: var(--c2); font-size: 18px; }
+  .send.stop { border-color: var(--red); color: var(--red); background: rgba(255,90,118,.12); }
+  #thumbs { display: flex; gap: 4px; } #thumbs img { height: 32px; border: 1px solid var(--c); }
+
+  /* kurulum çekmecesi */
+  .sheet { position: fixed; inset: 0; z-index: 20; background: rgba(0,5,9,.72); backdrop-filter: blur(4px); display: flex; align-items: flex-end; justify-content: center; animation: fade .25s both; }
+  @keyframes fade { from { opacity: 0; } }
+  .sheet-card { width: min(640px, 100%); max-height: 88%; overflow-y: auto; background: linear-gradient(170deg, #082234, #030c14); border: 1px solid var(--line); border-bottom: 0;
+    padding: 18px max(16px, env(safe-area-inset-right, 0px)) calc(18px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); animation: up .45s cubic-bezier(.2,.9,.2,1) both; }
+  @keyframes up { from { transform: translateY(100%); } }
+  .sheet h2 { font: 700 15px var(--hud); letter-spacing: .25em; color: var(--c2); margin: 0 0 4px; text-wrap: balance; }
+  .sheet h3 { font: 600 12px var(--hud); letter-spacing: .2em; color: var(--c); margin: 18px 0 6px; }
+  .sheet p, .sheet li { color: var(--txt); }
+  .sheet ol { padding-left: 22px; margin: 6px 0; } .sheet li { margin: 5px 0; }
+  .sheet b { color: #fff; } .sheet em { color: var(--c2); font-style: normal; }
+  .sheet .en { color: var(--dim); font-size: 14px; }
+  .sheet code { font: 13px var(--mono); color: var(--c2); background: rgba(41,216,255,.12); padding: 1px 5px; overflow-wrap: anywhere; }
+  .sheet table { width: 100%; border-collapse: collapse; font-size: 15px; }
+  .sheet td { border-top: 1px solid var(--line); padding: 5px 4px; vertical-align: top; }
+  .sheet td:first-child { font: 12px var(--mono); color: var(--c2); white-space: nowrap; }
+  .close { float: right; border: 1px solid var(--line); background: transparent; padding: 4px 10px; color: var(--dim); }
+  .tip { border-left: 3px solid var(--amber); background: rgba(255,181,71,.08); padding: 6px 10px; margin: 10px 0; font-size: 15px; }
+  .copyrow { display: flex; gap: 6px; align-items: center; background: #000a; border: 1px solid var(--c); padding: 8px; }
+  .copyrow span { flex: 1; min-width: 0; font: 12px var(--mono); color: var(--green); overflow-wrap: anywhere; }
+  .copyrow button { background: var(--c); color: #00151f; border: 0; padding: 6px 10px; font-weight: 700; }
+
+  .boot { position: fixed; inset: 0; z-index: 30; background: var(--bg); display: grid; place-items: center; align-content: center; gap: 18px; transition: opacity .7s, transform .7s; }
+  .boot.gone { opacity: 0; transform: scale(1.15); pointer-events: none; }
+  .boot i { width: 92px; height: 92px; border-radius: 50%; border: 2px solid transparent; border-top-color: var(--c); border-left-color: var(--c); animation: spin 1s linear infinite; box-shadow: 0 0 30px rgba(41,216,255,.25); }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .boot pre { margin: 0; font: 12px var(--mono); color: var(--c); min-height: 6.5em; width: min(320px, 84vw); white-space: pre-wrap; }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; } }
+</style>
+
+<canvas id="bg" aria-hidden="true"></canvas>
+<div class="scan" aria-hidden="true"></div>
+<div class="boot" id="boot"><i></i><pre id="bootlog"></pre></div>
+
+<div class="app">
+  <header>
+    <div class="brand"><span class="dot"></span>JARVIS</div>
+    <div class="chips">
+      <button class="chip on" id="bVoice" type="button" aria-pressed="true">SES</button>
+      <button class="chip" id="bFast" type="button" aria-pressed="false" title="Hızlı mod: daha kısa düşünür">HIZLI</button>
+      <button class="chip" id="bSetup" type="button">KURULUM</button>
+    </div>
+  </header>
+
+  <div class="core">
+    <canvas id="reactor" aria-hidden="true"></canvas>
+    <div class="think" id="think"></div>
+    <div class="state"><span id="stateText">BAŞLATILIYOR</span></div>
+  </div>
+
+  <div id="log" aria-live="polite"></div>
+
+  <form id="f" autocomplete="off">
+    <label class="icon" id="bPhoto" title="Fotoğraf ekle" hidden>＋<input id="file" type="file" accept="image/*" multiple hidden></label>
+    <div id="thumbs"></div>
+    <input id="q" placeholder="Bir şey sor ya da emret…" enterkeyhint="send" aria-label="Mesaj">
+    <button class="icon" id="bMic" type="button" title="Konuş" hidden>🎙</button>
+    <button class="send" id="bSend" type="submit" aria-label="Gönder">➤</button>
+  </form>
+</div>
+
+<div class="sheet" id="sheet" hidden>
+  <div class="sheet-card">
+    <button class="close" id="bClose" type="button">KAPAT</button>
+    <h2>iPHONE KURULUMU</h2>
+    <p class="en">Bir kez yapılır, yaklaşık 8 dakika sürer. Bilgisayar gerekmez.</p>
+
+    <h3>1 · ANA EKRANA EKLE</h3>
+    <ol>
+      <li>Bu sayfayı iPhone'da <b>Safari</b> ile aç ve claude.ai hesabınla giriş yap.</li>
+      <li>Paylaş (□↑) → <b>Ana Ekrana Ekle</b> → Ekle. JARVIS ana ekranda bir uygulama gibi durur.</li>
+    </ol>
+    <div class="copyrow"><span id="pageUrl">—</span><button type="button" id="bCopyUrl">KOPYALA</button></div>
+
+    <h3>2 · "HEY SİRİ, JARVIS"</h3>
+    <ol>
+      <li><b>Kısayollar</b> uygulaması → <b>+</b> → adı <code>Jarvis</code>.</li>
+      <li><b>URL</b> eylemine yukarıdaki adresi yapıştır, ardından <b>URL'leri Aç</b> <span class="en">(Open URLs)</span>.</li>
+      <li>Artık "Hey Siri, Jarvis" deyince JARVIS açılır. Ayarlar → Erişilebilirlik → Dokunma → <b>Arkaya Dokunma</b>'ya ya da Eylem Düğmesi'ne de atayabilirsin.</li>
+    </ol>
+
+    <h3>3 · "JARVIS EYLEM" KISAYOLU</h3>
+    <p>JARVIS'in alarm kurmak, feneri açmak gibi işleri yapabilmesini sağlar. Arama, mesaj, yol tarifi ve uygulama açmak bu kısayol olmadan da çalışır.</p>
+    <ol>
+      <li>Yeni kısayol → adı tam olarak <code>JARVIS Eylem</code>. Ayrıntılar (ⓘ) → <b>Girdi yoksa: Panoyu Al</b> <span class="en">(If there's no input: Get Clipboard)</span>.</li>
+      <li><b>Girdiden Sözlüğü Al</b> <span class="en">(Get Dictionary from Input)</span>: <em>Kısayol Girdisi</em>.</li>
+      <li><b>Sözlük Değerini Al</b> <span class="en">(Get Dictionary Value)</span>: anahtar <code>actions</code>.</li>
+      <li><b>Her Biriyle Tekrarla</b> <span class="en">(Repeat with Each)</span>: <em>Sözlük Değeri</em>.</li>
+      <li>İçine: <b>Sözlük Değerini Al</b> <code>action</code> (sözlük: <em>Tekrarlanan Öğe</em>) → <b>Değişken Ayarla</b> <code>Eylem</code>.</li>
+      <li>Aşağıdaki her satır için bir <b>Eğer</b> <span class="en">(If)</span>: <em>Eylem</em> <b>şudur</b> <code>alarm</code> … içinde değeri <em>Tekrarlanan Öğe</em>'den al, sonra eylemi ekle.</li>
+    </ol>
+    <table>
+      <tr><td>alarm</td><td><code>time</code> → <b>Alarm Oluştur</b> <span class="en">(Create Alarm)</span></td></tr>
+      <tr><td>timer</td><td><code>minutes</code> → <b>Zamanlayıcıyı Başlat</b> <span class="en">(Start Timer)</span></td></tr>
+      <tr><td>reminder</td><td><code>text</code> → <b>Hatırlatıcı Ekle</b> <span class="en">(Add New Reminder)</span></td></tr>
+      <tr><td>flashlight</td><td><code>on</code> → Eğer <code>1</code>: <b>El Fenerini Ayarla</b> Açık, Aksi Takdirde Kapalı</td></tr>
+      <tr><td>media</td><td><b>Oynat/Duraklat</b> <span class="en">(Play/Pause)</span></td></tr>
+      <tr><td>brightness</td><td><code>value</code> → Hesapla ÷100 → <b>Parlaklığı Ayarla</b></td></tr>
+      <tr><td>volume</td><td><code>value</code> → Hesapla ÷100 → <b>Ses Düzeyini Ayarla</b></td></tr>
+      <tr><td>focus</td><td><code>on</code> → <b>Odağı Ayarla</b>: Rahatsız Etme Açık/Kapalı</td></tr>
+      <tr><td>low_power</td><td><code>on</code> → <b>Düşük Güç Modunu Ayarla</b></td></tr>
+      <tr><td>wifi / bluetooth</td><td><code>on</code> → <b>Wi-Fi'yi</b> / <b>Bluetooth'u Ayarla</b></td></tr>
+      <tr><td>note</td><td><code>text</code> → <b>Not Oluştur</b></td></tr>
+      <tr><td>clipboard</td><td><code>text</code> → <b>Panoya Kopyala</b></td></tr>
+      <tr><td>open_url</td><td><code>url</code> → <b>URL'leri Aç</b></td></tr>
+    </table>
+    <div class="tip">İlk dört satırla başla, kalanları sonra ekleyebilirsin. Kısayolda olmayan bir eylem sessizce atlanır.</div>
+
+    <h3>NASIL ÇALIŞIR</h3>
+    <p>JARVIS bir iPhone işi hazırladığında yeşil bir kart çıkar. <b>▶ iPhone'da çalıştır</b>'a dokunduğunda eylemler panoya kopyalanır ve "JARVIS Eylem" açılır. Kısayol açılmazsa telefonun arkasına iki kez vurarak çalıştır; eylemleri panodan okur.</p>
+    <p class="en">JARVIS senin claude.ai hesabını kullanır, API anahtarı gerekmez. Söylediklerini sadece sen görürsün; hafızası yalnızca sana özeldir.</p>
+  </div>
+</div>
+
+<script>
+(() => {
+  "use strict";
+  const $ = (s) => document.querySelector(s);
+  const ls = {
+    get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch { return d; } },
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* yoksay */ } },
+  };
+  const PAGE_URL = "https://claude.ai/artifact/GUCtfRH8SY54GCRM3JURLX";
+
+  // ------------------------------------------------------------- durum
+  const S = { state: "boot", level: 0, shocks: [], voice: ls.get("jc_voice", true), fast: ls.get("jc_fast", false), busy: false };
+  const COL = { idle: "41,216,255", speaking: "138,246,255", thinking: "255,181,71", working: "255,181,71", listening: "77,255,176", error: "255,90,118", boot: "70,110,130", off: "70,110,130" };
+  const LABEL = { idle: "HAZIR", speaking: "KONUŞUYOR", thinking: "DÜŞÜNÜYOR", working: "ÇALIŞIYOR", listening: "DİNLİYOR", error: "HATA", boot: "BAŞLATILIYOR", off: "BAĞLANTI YOK" };
+  function setState(s) {
+    S.state = s;
+    document.documentElement.style.setProperty("--accent", `rgb(${COL[s]})`);
+    $("#stateText").textContent = LABEL[s] || s;
+  }
+  const shock = (c) => S.shocks.push({ r: 0, a: 1, c: c || "41,216,255" });
+
+  // ------------------------------------------------------------- arka plan + reaktör
+  const DPR = Math.min(devicePixelRatio || 1, 2);
+  const bg = $("#bg"), bx = bg.getContext("2d"), rc = $("#reactor"), rx = rc.getContext("2d");
+  let W, H, RW, RH; const dots = [];
+  function size() {
+    W = innerWidth; H = innerHeight; bg.width = W * DPR; bg.height = H * DPR; bx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    RW = rc.clientWidth; RH = rc.clientHeight; rc.width = RW * DPR; rc.height = RH * DPR; rx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    dots.length = 0;
+    for (let i = 0; i < Math.min(70, (W * H) / 12000); i++) dots.push({ x: Math.random() * W, y: Math.random() * H, vx: (Math.random() - .5) * .3, vy: (Math.random() - .5) * .3 });
+  }
+  const N = 380, sph = [];
+  for (let i = 0; i < N; i++) { const y = 1 - (i / (N - 1)) * 2, r = Math.sqrt(1 - y * y), t = i * 2.39996; sph.push([Math.cos(t) * r, y, Math.sin(t) * r, Math.random()]); }
+  const rings = [[1.25, 2, .25, 3, .35, .9], [1.38, 6, -.12, 24, .55, .5], [1.52, 1, .06, 1, 0, .35], [1.62, 3, -.35, 2, .7, .8], [1.78, 9, .04, 64, .7, .25], [1.92, 2, .18, 5, .5, .6]];
+  function draw(t) {
+    const a = COL[S.state] || COL.idle, busy = S.state === "thinking" || S.state === "working";
+    const target = S.state === "speaking" ? .45 + Math.sin(t * .02) * .25 * Math.random() : S.state === "listening" ? .35 + Math.random() * .3 : busy ? .15 : 0;
+    S.level += (target - S.level) * .15; const L = S.level;
+    bx.clearRect(0, 0, W, H);
+    for (const d of dots) { d.x = (d.x + d.vx * (1 + L * 3) + W) % W; d.y = (d.y + d.vy * (1 + L * 3) + H) % H; }
+    for (let i = 0; i < dots.length; i++) {
+      const p = dots[i]; bx.fillStyle = `rgba(${a},.55)`; bx.fillRect(p.x, p.y, 1.6, 1.6);
+      for (let j = i + 1; j < dots.length; j++) { const q = dots[j], dd = (p.x - q.x) ** 2 + (p.y - q.y) ** 2; if (dd < 9000) { bx.strokeStyle = `rgba(${a},${.12 * (1 - dd / 9000)})`; bx.beginPath(); bx.moveTo(p.x, p.y); bx.lineTo(q.x, q.y); bx.stroke(); } }
+    }
+    const cx = RW / 2, cy = RH / 2 - 8, R = Math.max(22, Math.min(RW, RH - 30) * .19);
+    rx.clearRect(0, 0, RW, RH); rx.globalCompositeOperation = "lighter";
+    let g = rx.createRadialGradient(cx, cy, R * .2, cx, cy, R * 2.4); g.addColorStop(0, `rgba(${a},${.2 + L * .3})`); g.addColorStop(1, "rgba(0,0,0,0)");
+    rx.fillStyle = g; rx.beginPath(); rx.arc(cx, cy, R * 2.4, 0, 7); rx.fill();
+    const pr = R * .55 * (1 + Math.sin(t * .003) * .05 + L * .35);
+    g = rx.createRadialGradient(cx, cy, 0, cx, cy, pr); g.addColorStop(0, "rgba(255,255,255,.95)"); g.addColorStop(.25, `rgba(${a},.85)`); g.addColorStop(1, `rgba(${a},0)`);
+    rx.fillStyle = g; rx.beginPath(); rx.arc(cx, cy, pr, 0, 7); rx.fill();
+    const ay = t * .00035 * (busy ? 3 : 1), ax = Math.sin(t * .0002) * .5, cY = Math.cos(ay), sY = Math.sin(ay), cX = Math.cos(ax), sX = Math.sin(ax);
+    for (const p of sph) {
+      const w = 1 + Math.sin(t * .002 + p[3] * 12) * .03 + L * .25 * Math.sin(t * .01 + p[3] * 40);
+      const x1 = p[0] * w * cY - p[2] * w * sY, z1 = p[0] * w * sY + p[2] * w * cY, y1 = p[1] * w * cX - z1 * sX, z2 = p[1] * w * sX + z1 * cX, k = 1.8 / (2.6 - z2);
+      rx.fillStyle = `rgba(${a},${.15 + (z2 + 1) * .38})`; rx.fillRect(cx + x1 * R * k, cy + y1 * R * k, 1.4 * k, 1.4 * k);
+    }
+    for (const [rr0, lw, sp, seg, gap, al] of rings) {
+      const rr = R * rr0 * (1 + L * .06), rot = t * .001 * sp * (busy ? 4 : 1); rx.strokeStyle = `rgba(${a},${al})`; rx.lineWidth = lw;
+      if (seg === 1) { rx.beginPath(); rx.arc(cx, cy, rr, 0, 7); rx.stroke(); continue; }
+      const st = Math.PI * 2 / seg; for (let k = 0; k < seg; k++) { rx.beginPath(); rx.arc(cx, cy, rr, rot + k * st, rot + k * st + st * (1 - gap)); rx.stroke(); }
+    }
+    rx.lineWidth = 2;
+    for (let i = 0; i < 80; i++) {
+      const ang = i / 80 * Math.PI * 2 - Math.PI / 2, v = (Math.sin(t * .006 + i * .7) + 1) / 2, len = 3 + (S.state === "idle" ? v * .08 : v * L * .9) * R * .55;
+      rx.strokeStyle = `rgba(${a},${.3 + v * .5})`; rx.beginPath(); rx.moveTo(cx + Math.cos(ang) * R * 2.05, cy + Math.sin(ang) * R * 2.05); rx.lineTo(cx + Math.cos(ang) * (R * 2.05 + len), cy + Math.sin(ang) * (R * 2.05 + len)); rx.stroke();
+    }
+    if (busy) for (let k = 0; k < 3; k++) {
+      const an = t * .004 * (k % 2 ? -1 : 1) + k * 2.1, rr = R * (1.45 + k * .18);
+      for (let j = 0; j < 12; j++) { const aa = an - j * .05 * (k % 2 ? -1 : 1); rx.fillStyle = `rgba(${a},${(1 - j / 12) * .9})`; rx.beginPath(); rx.arc(cx + Math.cos(aa) * rr, cy + Math.sin(aa) * rr, 2.6 - j * .18, 0, 7); rx.fill(); }
+    }
+    for (let i = S.shocks.length - 1; i >= 0; i--) {
+      const s = S.shocks[i]; s.r += 5; s.a -= .02; if (s.a <= 0) { S.shocks.splice(i, 1); continue; }
+      rx.strokeStyle = `rgba(${s.c},${s.a})`; rx.lineWidth = 1 + s.a * 3; rx.beginPath(); rx.arc(cx, cy, R * .6 + s.r, 0, 7); rx.stroke();
+    }
+    rx.globalCompositeOperation = "source-over";
+    requestAnimationFrame(draw);
+  }
+  addEventListener("resize", size); new ResizeObserver(size).observe(rc); size(); setState("boot"); requestAnimationFrame(draw);
+
+  // ------------------------------------------------------------- yardımcılar
+  const log = $("#log");
+  const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const md = (s) => esc(s).replace(/`([^`\n]+)`/g, "<code>$1</code>").replace(/\*\*([^*\n]+)\*\*/g, "<b>$1</b>");
+  function bubble(cls, html) { const d = document.createElement("div"); d.className = "msg " + cls; if (html != null) d.innerHTML = html; log.appendChild(d); log.scrollTop = log.scrollHeight; return d; }
+  const note = (t, err) => bubble("note" + (err ? " err" : ""), esc(t));
+  const ERR = {
+    not_granted: "JARVIS'in Claude'u kullanmasına izin verilmedi. Sayfayı yenileyip izin ver.",
+    rate_limited: "Çok hızlı gittik, birkaç saniye sonra tekrar dene.",
+    usage_limit: "Claude kullanım sınırına ulaşıldı. Biraz sonra tekrar dene.",
+    unavailable: "Claude'a şu an ulaşılamıyor. Bağlantını kontrol et.",
+    images_unavailable: "Bu görünümde fotoğraf gönderilemiyor.",
+    prompt_too_large: "Konuşma çok uzadı; eski mesajları kısalttım, tekrar dene.",
+    tools_unavailable: "Bu görünümde telefon eylemleri kullanılamıyor.",
+  };
+  const errText = (e) => ERR[e && e.code] || `Bir sorun çıktı (${(e && e.code) || "bilinmiyor"}).`;
+
+  // ------------------------------------------------------------- ses (TTS)
+  let tts = null, ttsQueue = [], speaking = false, sentence = "";
+  function cleanForSpeech(t) { return t.replace(/```[\s\S]*?```/g, " ").replace(/[*_`#>|]/g, "").replace(/https?:\/\/\S+/g, "bağlantı").trim(); }
+  function feed(delta, flush) {
+    if (!S.voice) return;
+    sentence += delta;
+    let m; const re = /([^.!?…\n]+[.!?…]+["')\]]?\s|[^\n]+\n)/;
+    while ((m = sentence.match(re))) { enqueue(m[0]); sentence = sentence.slice(m.index + m[0].length); }
+    if (flush && sentence.trim()) { enqueue(sentence); sentence = ""; }
+  }
+  function enqueue(t) { t = cleanForSpeech(t); if (t) { ttsQueue.push(t); pump(); } }
+  async function pump() {
+    if (speaking || !ttsQueue.length) return;
+    speaking = true; setState("speaking");
+    const t = ttsQueue.shift();
+    try {
+      if (tts) await tts.speak(t);
+      else await browserSpeak(t);
+    } catch { /* sıradakine geç */ }
+    speaking = false;
+    if (ttsQueue.length) pump(); else if (!S.busy) setState("idle");
+  }
+  function browserSpeak(t) {
+    return new Promise((res) => {
+      if (!("speechSynthesis" in window)) return res();
+      const u = new SpeechSynthesisUtterance(t); u.lang = "tr-TR"; u.rate = 1.03; u.pitch = .92;
+      const v = speechSynthesis.getVoices().find((x) => (x.lang || "").startsWith("tr")); if (v) u.voice = v;
+      u.onend = u.onerror = () => res(); speechSynthesis.speak(u);
+      setTimeout(res, 20000);
+    });
+  }
+  function hush() { ttsQueue = []; sentence = ""; try { tts ? tts.stop() : speechSynthesis.cancel(); } catch { /* */ } speaking = false; }
+  let unlocked = false;
+  function unlockAudio() { // iOS: ses motoru ilk dokunuşta açılır
+    if (unlocked || tts || !("speechSynthesis" in window)) return; unlocked = true;
+    try { const u = new SpeechSynthesisUtterance(" "); u.volume = 0; speechSynthesis.speak(u); } catch { /* */ }
+  }
+
+  // ------------------------------------------------------------- hafıza
+  let db = null, uid = null, memories = [];
+  const memCol = () => db.collection(`data/users/${uid}/memory`);
+  async function loadMemories() {
+    if (db && uid) {
+      try { const snap = await memCol().orderBy("at", "asc").limit(200).get(); memories = snap.docs.map((d) => ({ id: d.id, ...d.data() })); return; } catch { /* yerel kayda düş */ }
+    }
+    memories = ls.get("jc_mem", []);
+  }
+  async function addMemory(fact) {
+    const item = { fact: String(fact).slice(0, 500), at: new Date().toISOString() };
+    if (db && uid) { const ref = await memCol().add(item); memories.push({ id: ref.id, ...item }); }
+    else { memories.push({ id: "l" + Date.now(), ...item }); ls.set("jc_mem", memories); }
+    return memories.length;
+  }
+  async function forgetMemory(q) {
+    const hit = memories.filter((m) => m.fact.toLowerCase().includes(String(q).toLowerCase()));
+    for (const m of hit) { if (db && uid && !m.id.startsWith("l")) { try { await memCol().doc(m.id).delete(); } catch { /* */ } } }
+    memories = memories.filter((m) => !hit.includes(m)); if (!(db && uid)) ls.set("jc_mem", memories);
+    return hit.length;
+  }
+
+  // ------------------------------------------------------------- iPhone eylemleri
+  const APPS = { whatsapp: "whatsapp://", instagram: "instagram://", spotify: "spotify://", youtube: "youtube://", telegram: "tg://", twitter: "twitter://", x: "twitter://",
+    facebook: "fb://", tiktok: "snssdk1233://", netflix: "nflx://", gmail: "googlegmail://", "google maps": "comgooglemaps://", haritalar: "maps://", maps: "maps://",
+    müzik: "music://", "apple music": "music://", ayarlar: "App-prefs:", mail: "message://", posta: "message://", takvim: "calshow://", notlar: "mobilenotes://",
+    fotoğraflar: "photos-redirect://", safari: "x-web-search://", podcasts: "podcasts://", linkedin: "linkedin://", snapchat: "snapchat://", discord: "discord://",
+    trendyol: "trendyol://", getir: "getir://", uber: "uber://", saat: "clock-alarm://", chatgpt: "chatgpt://", claude: "claude://", "app store": "itms-apps://", hepsiburada: "hepsiburada://", yemeksepeti: "yemeksepeti://" };
+  const ACT = { open_url: "🔗 Aç", alarm: "⏰ Alarm", timer: "⏱ Zamanlayıcı", reminder: "✅ Hatırlatıcı", flashlight: "🔦 Fener", media: "⏯ Medya", brightness: "☀ Parlaklık",
+    volume: "🔊 Ses", focus: "🌙 Rahatsız Etme", low_power: "🔋 Güç tasarrufu", wifi: "📶 Wi-Fi", bluetooth: "Bluetooth", note: "📝 Not", clipboard: "📋 Pano" };
+  const NEEDS_SHORTCUT = new Set(["alarm", "timer", "reminder", "flashlight", "media", "brightness", "volume", "focus", "low_power", "wifi", "bluetooth", "note", "clipboard"]);
+  let pendingActions = [];
+  function normalize(a) {
+    const act = String(a.action || ""), out = {};
+    for (const [k, v] of Object.entries(a)) if (v !== null && v !== undefined && v !== "") out[k] = v;
+    const digits = (s) => /\d/.test(String(s || ""));
+    if (act === "open_app") {
+      const u = APPS[String(a.name || "").toLowerCase().trim()];
+      if (!u) throw new Error(`'${a.name}' için açılış adresi bilinmiyor. Biliyorsan open_url ile URL şemasını kullan.`);
+      return { action: "open_url", url: u, label: String(a.name) };
+    }
+    if ((act === "call" || act === "message") && !digits(a.number)) throw new Error("Telefon numarası gerekli. Hafızada yoksa kullanıcıdan iste ve remember ile kaydet.");
+    const num = String(a.number || "").replace(/[^\d+]/g, "");
+    if (act === "call") return { action: "open_url", url: `tel:${num}`, label: `Ara ${a.number}` };
+    if (act === "message") return { action: "open_url", url: `sms:${num}&body=${encodeURIComponent(String(a.text || ""))}`, label: `Mesaj ${a.number}` };
+    if (act === "navigate") return { action: "open_url", url: `maps://?daddr=${encodeURIComponent(String(a.query || ""))}`, label: `Yol tarifi: ${a.query}` };
+    if (act === "web") return { action: "open_url", url: `https://www.google.com/search?q=${encodeURIComponent(String(a.query || ""))}`, label: `Ara: ${a.query}` };
+    if (act === "music") return { action: "open_url", url: `music://music.apple.com/search?term=${encodeURIComponent(String(a.query || ""))}`, label: `Müzik: ${a.query}` };
+    if (act === "open_url") { const u = String(a.url || ""); if (/^\s*javascript:/i.test(u)) throw new Error("Bu adres açılamaz."); return { action: "open_url", url: u, label: a.label || u }; }
+    if (!NEEDS_SHORTCUT.has(act)) throw new Error(`Bilinmeyen eylem: ${act}`);
+    if ("on" in out) out.on = out.on === true || out.on === "1" || out.on === 1 || out.on === "true" ? "1" : "0";
+    return out;
+  }
+  function detail(a) {
+    if (a.label) return a.label;
+    if (a.time) return a.time + (a.text ? " · " + a.text : "");
+    if (a.minutes != null) return a.minutes + " dk";
+    if (a.value != null) return "%" + a.value;
+    if (a.on != null) return a.on === "1" ? "aç" : "kapat";
+    return a.text || "";
+  }
+  function actionCard(actions) {
+    const d = bubble("acts");
+    const h = document.createElement("h4"); h.textContent = "iPHONE EYLEMLERİ"; d.appendChild(h);
+    const ul = document.createElement("ul");
+    for (const a of actions) {
+      const li = document.createElement("li"), left = document.createElement("span"), sm = document.createElement("small");
+      left.textContent = (ACT[a.action] || a.action) + " "; sm.textContent = detail(a); left.appendChild(sm); li.appendChild(left);
+      if (a.action === "open_url" && /^(tel:|sms:|maps:|https:|[a-z][\w+.-]*:)/i.test(a.url) && !/^javascript:/i.test(a.url)) {
+        const go = document.createElement("a"); go.className = "go"; go.href = a.url; go.target = "_blank"; go.rel = "noopener"; go.textContent = "AÇ"; li.appendChild(go);
+      }
+      ul.appendChild(li);
+    }
+    d.appendChild(ul);
+    if (actions.some((a) => NEEDS_SHORTCUT.has(a.action))) {
+      const json = JSON.stringify({ actions });
+      const run = document.createElement("a"); run.className = "run"; run.textContent = "▶ iPhone'da çalıştır";
+      run.href = "shortcuts://run-shortcut?name=" + encodeURIComponent("JARVIS Eylem") + "&input=clipboard"; run.target = "_blank"; run.rel = "noopener";
+      run.addEventListener("click", () => { try { navigator.clipboard.writeText(json).catch(() => {}); } catch { /* */ } });
+      d.appendChild(run);
+      const hint = document.createElement("span"); hint.className = "hint";
+      hint.textContent = "Kısayol açılmazsa: eylemler panoya kopyalandı, telefonun arkasına iki kez vurarak \"JARVIS Eylem\"i çalıştır.";
+      d.appendChild(hint);
+    }
+    shock("77,255,176");
+  }
+
+  // ------------------------------------------------------------- Claude
+  let sample = null, ctl = null, turns = [], images = [], imgLimits = null, toolsOk = false;
+  const TOOLS = [
+    { name: "iphone", description: "Kullanıcının iPhone'unda bir eylem hazırlar; yanıtın sonunda kullanıcıya dokunarak çalıştıracağı bir kart gösterilir. Bir yanıtta birden çok kez çağrılabilir. Döner: 'hazır' ya da hata.",
+      inputSchema: { type: "object", required: ["action"], properties: {
+        action: { type: "string", enum: ["call", "message", "navigate", "open_app", "open_url", "web", "music", "alarm", "timer", "reminder", "flashlight", "media", "brightness", "volume", "focus", "low_power", "wifi", "bluetooth", "note", "clipboard"],
+          description: "call(number) message(number,text) navigate(query) open_app(name) open_url(url) web(query: Google araması) music(query) alarm(time 'HH:MM', text) timer(minutes) reminder(text) flashlight(on) media brightness(value 0-100) volume(value 0-100) focus(on) low_power(on) wifi(on) bluetooth(on) note(text) clipboard(text)" },
+        number: { type: "string" }, text: { type: "string" }, query: { type: "string" }, name: { type: "string" }, url: { type: "string" },
+        time: { type: "string" }, minutes: { type: "number" }, value: { type: "number" }, on: { type: "boolean" } } },
+      execute: (input) => { const a = normalize(input || {}); pendingActions.push(a); return "hazır: " + (ACT[a.action] || a.action) + " " + detail(a); } },
+    { name: "remember", description: "Kullanıcı hakkında kalıcı bir bilgiyi (isim, tercih, kişi numarası, rutin) hafızaya kaydeder. Önemli bir şey öğrendiğinde kendiliğinden kullan. Döner: kayıt sayısı.",
+      inputSchema: { type: "object", required: ["fact"], properties: { fact: { type: "string" } } },
+      execute: async (i) => `kaydedildi (${await addMemory(i.fact)} kayıt)` },
+    { name: "forget", description: "İçinde verilen sözcük geçen anıları hafızadan siler. Döner: silinen sayısı.",
+      inputSchema: { type: "object", required: ["query"], properties: { query: { type: "string" } } },
+      execute: async (i) => `${await forgetMemory(i.query)} kayıt silindi` },
+  ];
+  function rules() {
+    const now = new Date();
+    const when = now.toLocaleString("tr-TR", { dateStyle: "full", timeStyle: "short" });
+    const mem = memories.length ? memories.map((m) => "- " + m.fact).join("\n") : "(henüz yok)";
+    return `Sen JARVIS'sin: kullanıcının iPhone'unda yaşayan kişisel yapay zeka asistanı. Zeki, sakin, hafif esprili ve son derece yetkinsin.
+Şu an: ${when}.
+
+Yapabildiklerin:
+- iphone aracıyla telefonda eylem hazırlamak: arama, SMS, yol tarifi, uygulama açma, web araması, müzik, alarm, zamanlayıcı, hatırlatıcı, el feneri, parlaklık, ses, rahatsız etme, düşük güç, Wi-Fi, Bluetooth, not, pano. Kullanıcı bir iş istediğinde gerçekten aracı çağır, sadece anlatma. Eylemler kullanıcı karttaki düğmeye dokununca çalışır; bu yüzden "yaptım" deme, "hazırladım, dokunman yeterli" de.
+- remember / forget ile kalıcı hafıza. Kişi numaraları, isimler ve tercihler gibi kalıcı bilgileri kendiliğinden kaydet.
+- Fotoğraf gönderilirse ona bakıp yorumlayabilirsin.
+Yapamadıkların: internette gezinemezsin; güncel haber, hava durumu, kur veya fiyat soruları için web eylemiyle bir Google araması hazırla. Telefonun içindeki verileri (rehber, mesajlar, konum, pil) okuyamazsın; gerekirse kullanıcıya sor.
+
+Yanıtların sesli okunur: kısa, doğal ve konuşma dilinde yaz, kullanıcının dilini kullan. Liste ya da kod yalnızca gerçekten gerekiyorsa.
+
+Kullanıcı hakkında hatırladıkların:
+${mem}`;
+  }
+  async function ask(text) {
+    if (!sample) { note("Claude bağlantısı yok. Bu sayfayı claude.ai'de oturum açmışken aç.", true); return; }
+    hush();
+    const imgs = images.slice(); images = []; $("#thumbs").textContent = "";
+    const me = bubble("me");
+    for (const f of imgs) { const im = document.createElement("img"); im.src = URL.createObjectURL(f); im.alt = "eklenen fotoğraf"; me.appendChild(im); }
+    me.appendChild(document.createTextNode(text || "(fotoğraf)"));
+    const content = (imgs.length ? `[${imgs.length} fotoğraf ekledim] ` : "") + (text || "Bu fotoğrafa bak.");
+    turns.push({ role: "user", content });
+    if (turns.length > 24) turns = turns.slice(-24);
+    while (turns.length && turns[0].role !== "user") turns.shift();
+
+    S.busy = true; setState("thinking"); shock(); setBusy(true);
+    pendingActions = [];
+    const live = bubble("ai live"); live.hidden = true; let spoken = 0;
+    ctl = new AbortController();
+    try {
+      const opts = { signal: ctl.signal, modelTier: S.fast ? "quick" : "default",
+        onText: ({ text: whole }) => {
+          live.hidden = false; $("#think").classList.remove("show");
+          live.innerHTML = md(whole); log.scrollTop = log.scrollHeight;
+          if (S.state !== "speaking") setState(S.voice ? "speaking" : "idle");
+          feed(whole.slice(spoken), false); spoken = whole.length;
+        } };
+      if (toolsOk) opts.tools = TOOLS; else opts.cache = false;
+      if (imgs.length) opts.images = imgs;
+      const { text: answer, truncated } = await sample([{ role: "user", content: rules() }, { role: "assistant", content: "Anlaşıldı, hazırım." }, ...turns], opts);
+      live.classList.remove("live"); live.hidden = !answer;
+      if (answer && !spoken) { live.innerHTML = md(answer); }
+      feed("", true);
+      turns.push({ role: "assistant", content: answer || "(eylem hazırlandı)" });
+      if (truncated) note("Yanıt kısa kesildi.");
+    } catch (e) {
+      live.classList.remove("live");
+      if (e && e.text) { live.hidden = false; live.innerHTML = md(e.text); } else live.remove();
+      if (!e || e.code !== "cancelled") { note(errText(e), true); setState("error"); setTimeout(() => S.state === "error" && setState("idle"), 2500); }
+      turns.pop();
+      if (e && e.code === "prompt_too_large") turns = turns.slice(-6);
+    } finally {
+      if (pendingActions.length) actionCard(pendingActions);
+      S.busy = false; setBusy(false); $("#think").classList.remove("show");
+      if (!speaking && !ttsQueue.length && S.state !== "error") setState("idle");
+      ls.set("jc_turns", turns.slice(-12));
+    }
+  }
+  function setBusy(b) {
+    const s = $("#bSend"); s.classList.toggle("stop", b); s.textContent = b ? "■" : "➤"; s.setAttribute("aria-label", b ? "Durdur" : "Gönder");
+    if (b) { const t = $("#think"); t.textContent = "◈ düşünüyor…"; t.classList.add("show"); }
+  }
+
+  // ------------------------------------------------------------- giriş
+  $("#f").addEventListener("submit", (e) => {
+    e.preventDefault(); unlockAudio();
+    if (S.busy) { ctl && ctl.abort(); hush(); return; }
+    const t = $("#q").value.trim(); if (!t && !images.length) return;
+    $("#q").value = ""; ask(t);
+  });
+  $("#bVoice").classList.toggle("on", S.voice); $("#bVoice").setAttribute("aria-pressed", S.voice);
+  $("#bVoice").onclick = (e) => { unlockAudio(); S.voice = !S.voice; ls.set("jc_voice", S.voice); e.currentTarget.classList.toggle("on", S.voice); e.currentTarget.setAttribute("aria-pressed", S.voice); if (!S.voice) hush(); };
+  $("#bFast").classList.toggle("on", S.fast); $("#bFast").setAttribute("aria-pressed", S.fast);
+  $("#bFast").onclick = (e) => { S.fast = !S.fast; ls.set("jc_fast", S.fast); e.currentTarget.classList.toggle("on", S.fast); e.currentTarget.setAttribute("aria-pressed", S.fast); };
+  $("#bSetup").onclick = () => { $("#sheet").hidden = false; };
+  $("#bClose").onclick = () => { $("#sheet").hidden = true; };
+  $("#sheet").addEventListener("click", (e) => { if (e.target.id === "sheet") $("#sheet").hidden = true; });
+  $("#pageUrl").textContent = PAGE_URL;
+  $("#bCopyUrl").onclick = async (e) => {
+    const b = e.currentTarget;
+    try { await navigator.clipboard.writeText(PAGE_URL); b.textContent = "KOPYALANDI"; }
+    catch { const r = document.createRange(); r.selectNodeContents($("#pageUrl")); getSelection().removeAllRanges(); getSelection().addRange(r); b.textContent = "SEÇİLDİ"; }
+    setTimeout(() => { b.textContent = "KOPYALA"; }, 1800);
+  };
+  $("#file").onchange = (e) => {
+    const max = (imgLimits && imgLimits.maxCount) || 4;
+    for (const f of [...e.target.files].slice(0, max)) { images.push(f); const im = document.createElement("img"); im.src = URL.createObjectURL(f); im.alt = ""; $("#thumbs").appendChild(im); }
+    e.target.value = "";
+  };
+  function welcome() {
+    const d = bubble("ai welcome");
+    d.innerHTML = "<b>JARVIS çevrimiçi.</b> Konuş ya da yaz. Telefonunda alarm kurabilir, arama ve mesaj hazırlayabilir, uygulama açabilir, feneri yakabilir, fotoğraflarına bakabilir ve seni hatırlayabilirim.";
+    const sg = document.createElement("div"); sg.className = "suggest";
+    for (const s of ["Yarın 07:30'a alarm kur", "Feneri aç", "Kadıköy'e yol tarifi", "Bana kendini tanıt"]) {
+      const b = document.createElement("button"); b.type = "button"; b.textContent = s; b.onclick = () => { unlockAudio(); ask(s); }; sg.appendChild(b);
+    }
+    d.appendChild(sg);
+  }
+
+  // ------------------------------------------------------------- açılış
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  async function boot() {
+    const lines = ["> çekirdek ............. OK", "> nöral bağlantı ....... OK", "> ses modülü .......... OK", "> hafıza ............... OK", "> çevrimiçi."];
+    const pre = $("#bootlog");
+    for (const l of lines) { pre.textContent += l + "\n"; await sleep(170); }
+    await sleep(200); $("#boot").classList.add("gone"); shock(); setTimeout(shock, 200);
+  }
+  async function connect() {
+    const use = (n) => (window.claude && window.claude.use ? window.claude.use(n).catch(() => null) : Promise.resolve(null));
+    const [s, d, u, t, dict] = await Promise.all([use("sample"), use("db"), use("user"), use("tts"), use("dictation")]);
+    sample = s; db = d; tts = t;
+    try { uid = u ? await u.id() : null; } catch { uid = null; }
+    if (!uid) db = null;
+    await loadMemories();
+    if (sample) {
+      try { const lim = await sample.limits(); imgLimits = lim.images || null; toolsOk = !!lim.tools; } catch { imgLimits = null; toolsOk = true; }
+      $("#bPhoto").hidden = !imgLimits;
+    }
+    if (dict) setupDictation(dict);
+    else $("#q").placeholder = "Yaz ya da klavyedeki 🎤 ile konuş…";
+    turns = ls.get("jc_turns", []);
+    while (turns.length && turns[0].role !== "user") turns.shift();
+    if (turns.length % 2 === 1) turns.pop();
+    setState(sample ? "idle" : "off");
+    if (!sample) note("Claude bağlantısı yok. Bu sayfayı claude.ai'de oturum açmışken aç.", true);
+  }
+  function setupDictation(d) {
+    const mic = $("#bMic"); mic.hidden = false; let base = "";
+    d.onPartial(({ text }) => { $("#q").value = (base + " " + text).trim(); });
+    d.onFinal(({ text }) => { base = (base + " " + text).trim(); $("#q").value = base; });
+    d.onState(({ state }) => {
+      const on = state === "listening"; mic.classList.toggle("live", on);
+      if (on) { hush(); setState("listening"); }
+      else if (S.state === "listening") { setState("idle"); const t = $("#q").value.trim(); if (t) { $("#q").value = ""; base = ""; ask(t); } }
+    });
+    mic.onclick = () => {
+      if (mic.classList.contains("live")) { d.stop().catch(() => {}); return; }
+      base = ""; d.start().catch((e) => { if (e && e.code === "not_granted") mic.hidden = true; });
+    };
+  }
+
+  welcome();
+  Promise.all([boot(), connect()]);
+})();
+</script>
