@@ -68,7 +68,9 @@ async def check_questions(db: DB, client: TrendyolClient, settings: Settings, lo
         qid = q.get("id")
         if qid is None:
             continue
-        if db.one("SELECT 1 FROM notified_questions WHERE id=?", (qid,)):
+        # Kanal kapalıyken (dry-run) görülen sorular, kanal açıldığında bir kez gerçekten bildirilir
+        if db.one("SELECT 1 FROM notified_questions WHERE id=? AND (COALESCE(channel,'none') != 'none' OR ?)",
+                  (qid, settings.notify_channel == "none")):
             continue
         new.append(q)
     sent_info: dict[str, Any] = {"sent": False, "skipped": "yeni soru yok"}
@@ -82,7 +84,8 @@ async def check_questions(db: DB, client: TrendyolClient, settings: Settings, lo
             ts = now_ms()
             with db.tx() as cx:
                 for q in new:
-                    cx.execute("INSERT OR IGNORE INTO notified_questions(id,first_seen,notified_at,channel) VALUES(?,?,?,?)",
+                    cx.execute("""INSERT INTO notified_questions(id,first_seen,notified_at,channel) VALUES(?,?,?,?)
+                                  ON CONFLICT(id) DO UPDATE SET notified_at=excluded.notified_at, channel=excluded.channel""",
                                (q.get("id"), ts, ts if sent_info.get("sent") else None, sent_info.get("channel")))
     db.mark_sync("watcher", True, len(waiting))
     return {"ok": True, "waiting_total": len(waiting), "new": len(new), "new_ids": [q.get("id") for q in new],

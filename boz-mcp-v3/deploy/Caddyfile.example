@@ -1,0 +1,11 @@
+# Örnek reverse proxy (HTTPS). Alan adını kendinizinkiyle değiştirin.
+# ChatGPT connector URL'si: https://mcp-v3.ornek.com/mcp  (veya BOZ_ALLOW_PATH_TOKEN=1 ise /mcp/<token>)
+mcp-v3.ornek.com {
+    encode gzip
+    reverse_proxy 127.0.0.1:8765
+    header -Server
+    log {
+        output file /var/log/caddy/boz-mcp-v3.log
+        format json
+    }
+}

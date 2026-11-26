@@ -1,0 +1,10 @@
+[Unit]
+Description=BOZ MCP V3 — 5 dakikalık soru takibi (ONAY GEREKTİRİR, varsayılan kapalı) (zamanlayıcı)
+
+[Timer]
+OnCalendar=*:0/5
+Persistent=true
+RandomizedDelaySec=30
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,20 @@
+[Unit]
+Description=BOZ MCP V3 — 5 dakikalık soru takibi (ONAY GEREKTİRİR, varsayılan kapalı)
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=bozmcp
+Group=bozmcp
+WorkingDirectory=/opt/boz-mcp-v3
+EnvironmentFile=/opt/boz-mcp-v3/.env
+ExecStart=/opt/boz-mcp-v3/.venv/bin/python -m boz_mcp watch-questions
+TimeoutStartSec=1800
+MemoryMax=300M
+CPUQuota=40%
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/boz-mcp-v3/data /opt/boz-mcp-v3/backups
+UMask=0077

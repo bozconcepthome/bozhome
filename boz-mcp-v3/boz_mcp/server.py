@@ -102,6 +102,7 @@ class Engine:
             task = self._tasks.get(k)
             if task is None or task.done():
                 task = asyncio.ensure_future(self.sync.ensure(k, force=force, **self._sync_kwargs(k)))
+                task.add_done_callback(lambda t: t.cancelled() or t.exception())  # arka plan hatası sessizce kaybolmasın/uyarı üretmesin
                 self._tasks[k] = task  # aynı kaynak için eşzamanlı ikinci senkronizasyon başlatılmaz
             budget = self.SYNC_BUDGET_S if has_data else self.FIRST_SYNC_BUDGET_S
             done, _ = await asyncio.wait({task}, timeout=budget)

@@ -1,0 +1,10 @@
+[Unit]
+Description=BOZ MCP V3 — Trendyol veri senkronizasyonu (salt okunur) (zamanlayıcı)
+
+[Timer]
+OnCalendar=*:0/15
+Persistent=true
+RandomizedDelaySec=30
+
+[Install]
+WantedBy=timers.target

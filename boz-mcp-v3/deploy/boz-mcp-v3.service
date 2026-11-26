@@ -1,0 +1,38 @@
+# BOZ MCP V3 — ChatGPT connector için HTTP MCP sunucusu (mevcut MCP sunucusundan BAĞIMSIZ, ayrı port)
+[Unit]
+Description=BOZ MCP V3 Business Intelligence Engine
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=bozmcp
+Group=bozmcp
+WorkingDirectory=/opt/boz-mcp-v3
+EnvironmentFile=/opt/boz-mcp-v3/.env
+ExecStart=/opt/boz-mcp-v3/.venv/bin/python -m boz_mcp serve-http
+Restart=on-failure
+RestartSec=5
+StartLimitIntervalSec=300
+StartLimitBurst=10
+# Kaynak sınırları (sunucudaki diğer uygulamaları korumak için)
+MemoryMax=400M
+CPUQuota=50%
+TasksMax=64
+# Sıkılaştırma
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/boz-mcp-v3/data /opt/boz-mcp-v3/backups
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+LockPersonality=true
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+CapabilityBoundingSet=
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

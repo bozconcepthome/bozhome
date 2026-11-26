@@ -133,6 +133,23 @@ async def test_watcher_dedup_and_error_cooldown(settings, db, client, fake):
     fake.questions.append({"id": 999, "creationDate": t, "status": "WAITING_FOR_ANSWER", "productName": "P", "text": "Yeni?"})
     r3 = await check_questions(db, client, settings)
     assert r3["new"] == 1 and r3["new_ids"] == [999]
+    # kanal sonradan açılınca: dry-run'da görülen bekleyen sorular BİR KEZ gerçekten bildirilir, sonra tekrar edilmez
+    sent = []
+    settings.notify_channel, settings.webhook_url = "webhook", "https://hook.example/x"
+    import boz_mcp.watcher as w
+    orig = w.send
+
+    async def fake_send(st, title, body, transport=None):
+        sent.append(title)
+        return {"sent": True, "channel": "webhook", "status": 200}
+    w.send = fake_send
+    try:
+        r4 = await check_questions(db, client, settings)
+        r5 = await check_questions(db, client, settings)
+    finally:
+        w.send = orig
+    assert r4["new"] == 76 and r5["new"] == 0 and len(sent) == 1
+    settings.notify_channel = "none"
     fake.timeout_paths.add("/questions")
     e1 = await check_questions(db, client, settings)
     assert e1["ok"] is False and e1["error_notified"] is True and "0 değildir" in e1["note"]
