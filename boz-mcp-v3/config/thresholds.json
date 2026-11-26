@@ -1,0 +1,21 @@
+{
+  "timezone": "Europe/Istanbul",
+  "currency": "TRY",
+  "sales_drop_pct": 30,
+  "sales_spike_pct": 80,
+  "anomaly_robust_z": 3.0,
+  "critical_stock_days": 14,
+  "overstock_days": 180,
+  "symbolic_stock_threshold": 9999,
+  "safety_stock_service_z": 1.65,
+  "default_lead_time_days": null,
+  "target_cover_days": 30,
+  "complaint_rate_increase_pct": 50,
+  "damaged_rate_alert_pct": 3.0,
+  "competitor_price_drop_pct": 5,
+  "alert_cooldown_minutes": 360,
+  "error_alert_cooldown_minutes": 60,
+  "question_lookback_days": 7,
+  "cache_ttl_seconds": {"products": 1800, "orders": 900, "claims": 3600, "questions": 300, "settlements": 3600, "buybox": 3600},
+  "lead_time_days_by_barcode": {}
+}

@@ -1,0 +1,5 @@
+# BOZ MCP V3 — çalışma zamanı bağımlılıkları (sürüm aralıkları sabitlendi)
+mcp>=2.3,<3
+httpx>=0.27,<0.29
+pydantic>=2.7,<3
+uvicorn>=0.30,<1
